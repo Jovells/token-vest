@@ -1,0 +1,48 @@
+{
+    "name": "transaction-limit-kernel",
+    "version": "1.0.0",
+    "description": "A KRNL implementation for limiting transactions to 100 tokens per day",
+    "main": "index.js",
+    "scripts": {
+        "compile": "hardhat compile",
+        "test": "hardhat test",
+        "deploy:kernel": "hardhat run scripts/deploy-kernel.js --network sepolia",
+        "deploy:donation": "hardhat run scripts/deploy-donation.js --network sepolia",
+        "deploy:faucet": "hardhat run scripts/deploy-faucet.js --network sepolia",
+        "refill:faucet": "hardhat run scripts/refill-faucet.js --network sepolia",
+        "verify:kernel": "hardhat run scripts/verify-kernel.js --network sepolia",
+        "verify:donation": "hardhat run scripts/verify-donation.js --network sepolia",
+        "verify:faucet": "hardhat run scripts/verify-faucet.js --network sepolia",
+        "deploy:all": "npm run deploy:kernel && npm run deploy:donation && npm run deploy:faucet",
+        "verify:all": "npm run verify:kernel && npm run verify:donation && npm run verify:faucet",
+        "generate:abis": "hardhat compile && node scripts/generate-abis.js",
+        "frontend": "cd src/frontend && npm run dev"
+    },
+    "keywords": [
+        "krnl",
+        "ethereum",
+        "hardhat",
+        "solidity"
+    ],
+    "author": "",
+    "license": "MIT",
+    "devDependencies": {
+        "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
+        "@nomicfoundation/hardhat-ethers": "^3.0.0",
+        "@nomicfoundation/hardhat-network-helpers": "^1.0.0",
+        "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+        "@nomicfoundation/hardhat-verify": "^2.0.0",
+        "@typechain/ethers-v6": "^0.5.0",
+        "@typechain/hardhat": "^9.0.0",
+        "chai": "^4.2.0",
+        "dotenv": "^16.0.0",
+        "ethers": "^6.4.0",
+        "hardhat": "^2.19.0",
+        "hardhat-gas-reporter": "^1.0.8",
+        "solidity-coverage": "^0.8.0",
+        "typechain": "^8.3.0"
+    },
+    "dependencies": {
+        "@openzeppelin/contracts": "^5.0.0"
+    }
+}
