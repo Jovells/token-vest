@@ -108,6 +108,8 @@ function App() {
         }
       };
 
+      console.log({KRNL_ENTRY_ID, KRNL_ACCESS_TOKEN, kernelRequestData, functionParams})
+
    
 
       const krnlPayload = await provider.executeKernels(KRNL_ENTRY_ID, KRNL_ACCESS_TOKEN, kernelRequestData, functionParams);
@@ -182,12 +184,12 @@ function App() {
       }, amount] as const
 
       const res = true
-      // await publicClient.simulateContract({
-      //   address: contracts.limitedDonation.address,
-      //   abi: contracts.limitedDonation.abi,
-      //   functionName: 'donate',
-      //   args
-      // })
+      await publicClient.simulateContract({
+        address: contracts.limitedDonation.address,
+        abi: contracts.limitedDonation.abi,
+        functionName: 'donate',
+        args
+      })
       if (res){
         await donate({
           address: contracts.limitedDonation.address,
