@@ -1,13 +1,11 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
-
-import "./IKernel.sol";
+pragma solidity ^0.8.24;
 
 /**
  * @title TransactionLimitKernel
  * @dev On-chain kernel that tracks and limits user transactions to 100 tokens per 24 hours
  */
-contract TransactionLimitKernel is IKernel {
+contract TransactionLimitKernel  {
     // Maximum transaction amount per user in 24 hours (100 tokens with 18 decimals)
     uint256 public constant MAX_TRANSACTION_LIMIT = 100 * 10**18;
     
@@ -20,21 +18,6 @@ contract TransactionLimitKernel is IKernel {
     // Mapping to track the last transaction timestamp for each user
     mapping(address => uint256) private lastTransactionTimestamp;
     
-    /**
-     * @dev Execute kernel logic to check if a transaction exceeds the user's daily limit
-     * @param params Encoded data containing user address and transaction amount
-     * @return response Encoded boolean indicating if transaction is within limits
-     */
-    function execute(bytes calldata params) external view override returns (bytes memory) {
-        // Decode params: [user address, transaction amount]
-        (address user, uint256 amount) = abi.decode(params, (address, uint256));
-        
-        // Check if transaction is within limits
-        bool isWithinLimit = checkTransactionLimit(user, amount);
-        
-        // Return encoded boolean response
-        return abi.encode(isWithinLimit);
-    }
     
     /**
      * @dev Check if a transaction is within the user's daily limit

@@ -2,14 +2,14 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {KRNLImpl, KrnlPayload, KernelParameter, KernelResponse} from "./KRNL.sol";
+import {KRNL, KrnlPayload, KernelParameter, KernelResponse} from "./KRNL.sol";
 import "./TransactionLimitKernel.sol";
 
 /**
  * @title LimitedDonation
  * @dev A donation contract that uses the Transaction Limit Kernel to enforce donation limits
  */
-contract LimitedDonation is KRNLImpl {
+contract LimitedDonation is KRNL {
     // The ID of the Transaction Limit Kernel in the KRNL registry
     uint256 public transactionLimitKernelId;
     
@@ -48,7 +48,7 @@ contract LimitedDonation is KRNLImpl {
         address _kernelAddress,
         address _donationToken,
         address _charityAddress
-    ) KRNLImpl(_tokenAuthorityPublicKey) {
+    ) KRNL(_tokenAuthorityPublicKey) {
         transactionLimitKernelId = _kernelId;
         transactionLimitKernelAddress = _kernelAddress;
         donationToken = IERC20(_donationToken);

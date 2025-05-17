@@ -6,12 +6,10 @@ import { injected } from 'wagmi/connectors';
 // Contract ABIs
 import DonationTokenABI from '../abis/DonationToken';
 import LimitedDonationABI from '../abis/LimitedDonation';
-import TokenFaucetABI from '../abis/TokenFaucet';
 
 // Contract addresses from environment variables
 const DONATION_TOKEN_ADDRESS = import.meta.env.VITE_DONATION_TOKEN_ADDRESS as `0x${string}`;
 const LIMITED_DONATION_ADDRESS = import.meta.env.VITE_LIMITED_DONATION_ADDRESS as `0x${string}`;
-const TOKEN_FAUCET_ADDRESS = import.meta.env.VITE_TOKEN_FAUCET_ADDRESS as `0x${string}`;
 
 // Create wagmi config
 export const config = createConfig({
@@ -31,9 +29,5 @@ export const contracts = {
   limitedDonation: {
     address: LIMITED_DONATION_ADDRESS,
     abi: LimitedDonationABI,
-  },
-  tokenFaucet: {
-    address: TOKEN_FAUCET_ADDRESS,
-    abi: TokenFaucetABI,
   },
 } as const; 

@@ -1,23 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.24;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ECDSA} from "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import {MessageHashUtils} from "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
-
-/**
- * @title KRNL
- * @dev Interface for interacting with KRNL's on-chain kernels
- */
-interface KRNL {
-    
-    /**
-     * @dev Execute a kernel with the given payload
-     * @param kernelPayload The kernel ID and payload to execute
-     * @return response The kernel's response data
-     */
-    function executeKernel(KrnlPayload calldata kernelPayload) external view returns (bytes memory);
-}
 
 // Struct to group the parameters
 struct KrnlPayload {
@@ -39,14 +25,11 @@ struct KernelResponse {
 }
 
 // Draft Version
-contract KRNLImpl is Ownable {
+contract KRNL is Ownable {
     error UnauthorizedTransaction();
 
     address public tokenAuthorityPublicKey;
     mapping(bytes => bool) public executed;
-    
-    // For testing only - when true, skip the full signature verification
-    bool public testMode;
 
     modifier onlyAuthorized(
         KrnlPayload memory krnlPayload,
@@ -61,7 +44,6 @@ contract KRNLImpl is Ownable {
 
     constructor(address _tokenAuthorityPublicKey) Ownable(msg.sender) {
         tokenAuthorityPublicKey = _tokenAuthorityPublicKey;
-        testMode = false;
     }
 
     function setTokenAuthorityPublicKey(
@@ -69,30 +51,11 @@ contract KRNLImpl is Ownable {
     ) external onlyOwner {
         tokenAuthorityPublicKey = _tokenAuthorityPublicKey;
     }
-    
-    /**
-     * @dev Enable or disable test mode (for testing only)
-     * @param _enabled Whether test mode should be enabled
-     */
-    function setTestMode(bool _enabled) external onlyOwner {
-        testMode = _enabled;
-    }
 
     function _isAuthorized(
         KrnlPayload memory payload,
         bytes memory functionParams
     ) private view returns (bool) {
-        
-        // For testing purposes, we can skip the full verification process
-        if (testMode) {
-            // In test mode, call the mock auth contract's recover function 
-            // which should return the contract's address
-            try ITokenAuthority(tokenAuthorityPublicKey).recover(bytes32(0), bytes("mock")) returns (address recoveredAddr) {
-                return recoveredAddr == tokenAuthorityPublicKey;
-            } catch {
-                // If the call fails, proceed with normal verification
-            }
-        }
         
         (
             bytes memory kernelResponseSignature,
@@ -151,11 +114,3 @@ contract KRNLImpl is Ownable {
         return true;
     }
 }
-
-/**
- * @title ITokenAuthority
- * @dev Interface for the token authority (for testing mock implementations)
- */
-interface ITokenAuthority {
-    function recover(bytes32 digest, bytes memory signature) external view returns (address);
-} 

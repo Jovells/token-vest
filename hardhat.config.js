@@ -1,10 +1,16 @@
 require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
 
+if (!process.env.PRIVATE_KEY) {
+  throw new Error("PRIVATE_KEY is not set");
+}
+
+
+
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
   solidity: {
-    version: "0.8.20",
+    version: "0.8.24",
     settings: {
       optimizer: {
         enabled: true,

@@ -28,6 +28,7 @@ async function main() {
     await hre.run("verify:verify", {
       address: tokenAddress,
       constructorArguments: [initialSupply],
+      apiKey: process.env.ETHERSCAN_API_KEY,
     });
     console.log("DonationToken verified successfully!");
   } catch (error) {

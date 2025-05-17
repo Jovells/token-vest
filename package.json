@@ -8,11 +8,8 @@
         "test": "hardhat test",
         "deploy:kernel": "hardhat run scripts/deploy-kernel.js --network sepolia",
         "deploy:donation": "hardhat run scripts/deploy-donation.js --network sepolia",
-        "deploy:faucet": "hardhat run scripts/deploy-faucet.js --network sepolia",
-        "refill:faucet": "hardhat run scripts/refill-faucet.js --network sepolia",
         "verify:kernel": "hardhat run scripts/verify-kernel.js --network sepolia",
         "verify:donation": "hardhat run scripts/verify-donation.js --network sepolia",
-        "verify:faucet": "hardhat run scripts/verify-faucet.js --network sepolia",
         "deploy:all": "npm run deploy:kernel && npm run deploy:donation && npm run deploy:faucet",
         "verify:all": "npm run verify:kernel && npm run verify:donation && npm run verify:faucet",
         "generate:abis": "hardhat compile && node scripts/generate-abis.js",
@@ -43,6 +40,7 @@
         "typechain": "^8.3.0"
     },
     "dependencies": {
+        "@oasisprotocol/sapphire-contracts": "^0.2.14",
         "@openzeppelin/contracts": "^5.0.0"
     }
 }

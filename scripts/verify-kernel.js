@@ -1,4 +1,5 @@
 // Script to verify the Transaction Limit Kernel contract on Etherscan
+const { Network } = require("ethers");
 const hre = require("hardhat");
 require("dotenv").config();
 
@@ -17,6 +18,7 @@ async function main() {
     await hre.run("verify:verify", {
       address: kernelAddress,
       constructorArguments: [],
+      apiKey: process.env.ETHERSCAN_API_KEY,
     });
     
     console.log("Transaction Limit Kernel verified successfully!");

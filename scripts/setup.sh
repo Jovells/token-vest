@@ -45,7 +45,7 @@ done
 
 # Step 1: Deploy Kernel
 print_status "Step 1: Deploying Transaction Limit Kernel..."
-# npx hardhat run scripts/deploy-kernel.js --network sepolia
+npx hardhat run scripts/deploy-kernel.js --network sepolia
 
 # Wait for deployment to complete
 sleep 5
@@ -67,18 +67,11 @@ sleep 5
 read -p "Press Enter after you've  updated the .env file... wit Donation Token address"
 
 
-# Step 4: Deploy Faucet
-print_status "Step 4: Deploying Token Faucet..."
-npx hardhat run scripts/deploy-faucet.js --network sepolia
 
-# Wait for deployment to complete
-sleep 5
-read -p "Press Enter after you've  updated the .env file... with Faucet address"
 # Step 5: Verify Contracts
 print_status "Step 5: Verifying Contracts..."
 npx hardhat run scripts/verify-kernel.js --network sepolia
 npx hardhat run scripts/verify-donation.js --network sepolia
-npx hardhat run scripts/verify-faucet.js --network sepolia
 
 # Step 6: Generate ABIs
 print_status "Step 6: Generating ABIs..."
@@ -92,7 +85,6 @@ cat > src/frontend/.env << EOL
 # Contract Addresses
 VITE_DONATION_TOKEN_ADDRESS=$DONATION_TOKEN_ADDRESS
 VITE_LIMITED_DONATION_ADDRESS=$LIMITED_DONATION_ADDRESS
-VITE_TOKEN_FAUCET_ADDRESS=$TOKEN_FAUCET_ADDRESS
 
 # KRNL Configuration
 VITE_KRNL_ENTRY_ID=$KRNL_ENTRY_ID
@@ -103,13 +95,10 @@ EOL
 
 # Step 8: Install Frontend Dependencies
 print_status "Step 8: Installing Frontend Dependencies..."
-cd src/frontend
-npm install krnl-sdk
+cd src/frontend || exit
+npm install
 cd ../..
 
-# Step 9: Refill Faucet
-print_status "Step 9: Refilling Faucet..."
-npx hardhat run scripts/refill-faucet.js --network sepolia
 
 # Step 10: Final Checks
 print_status "Step 10: Performing Final Checks..."
@@ -118,7 +107,6 @@ print_status "Step 10: Performing Final Checks..."
 required_addresses=(
     "DONATION_TOKEN_ADDRESS"
     "LIMITED_DONATION_ADDRESS"
-    "TOKEN_FAUCET_ADDRESS"
     "TRANSACTION_LIMIT_KERNEL_ADDRESS"
 )
 
@@ -137,6 +125,5 @@ print_status "cd src/frontend && npm run dev"
 echo -e "\n${YELLOW}Important Information:${NC}"
 echo "Donation Token Address: $DONATION_TOKEN_ADDRESS"
 echo "Limited Donation Address: $LIMITED_DONATION_ADDRESS"
-echo "Token Faucet Address: $TOKEN_FAUCET_ADDRESS"
 echo "Transaction Limit Kernel Address: $TRANSACTION_LIMIT_KERNEL_ADDRESS"
 echo "Transaction Limit Kernel ID: $TRANSACTION_LIMIT_KERNEL_ID" 

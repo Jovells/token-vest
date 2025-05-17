@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { FaWallet, FaHandHoldingHeart, FaExclamationTriangle } from 'react-icons/fa';
-import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
-import { parseEther, formatEther, encodeAbiParameters } from 'viem';
+import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt, useConnectors } from 'wagmi';
+import { parseEther, formatEther, createPublicClient, http } from 'viem';
 import { sepolia } from 'viem/chains';
 import { contracts } from './config/wagmi';
+import {ethers} from 'krnl-sdk'
 import './App.css';
 import Faucet from './components/Faucet';
 
@@ -18,9 +19,13 @@ function App() {
   const [isExecutingKernel, setIsExecutingKernel] = useState(false);
 
   // Get account and network information
-  const { address, isConnected, connector, chainId } = useAccount();
+  const { address, isConnected, chainId } = useAccount();
+  const connectors = useConnectors();
   const isSepolia = chainId === sepolia.id;
-  console.log({isSepolia, chainId});
+
+  const connector = connectors.find((connector) => connector.name.toLowerCase().includes('metamask')) || connectors[0]
+  
+  const provider = new ethers.JsonRpcProvider(import.meta.env.VITE_RPC_URL);
 
   // Read contract data
   const { data: tokenBalance } = useReadContract({
@@ -62,6 +67,9 @@ function App() {
     },
   });
 
+  const abiCoder = new ethers.AbiCoder();
+
+
   // Write contract functions
   const { writeContractAsync: approve, data: approveData } = useWriteContract();
 
@@ -72,20 +80,23 @@ function App() {
     hash: approveData,
   });
 
+  
+
   const { isLoading: isDonating } = useWaitForTransactionReceipt({
     hash: donateData,
   });
 
   // Execute KRNL kernel
   const executeKernel = async (amount: bigint) => {
+
     if (!address) return null;
 
     setIsExecutingKernel(true);
     try {
-      const parameterForKernel = encodeAbiParameters(
-        [{ type: 'address' }],
-        [address]
-      );
+
+      const parameterForKernel = abiCoder.encode(["address", "uint256"], [address, amount]);
+      const functionParams = abiCoder.encode(["uint256"], [amount]);
+
 
       
       const kernelRequestData = {
@@ -96,34 +107,25 @@ function App() {
           }
         }
       };
-      
-      console.log({parameterForKernel});
-      const response = await fetch(`${import.meta.env.VITE_RPC_URL}/executeKernels`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          entryId: KRNL_ENTRY_ID,
-          accessToken: KRNL_ACCESS_TOKEN,
-          kernelRequestData,
-          functionParams: encodeAbiParameters(
-            [{ type: 'uint256' }],
-            [amount]
-          ),
-        }),
+
+   
+
+      const krnlPayload = await provider.executeKernels(KRNL_ENTRY_ID, KRNL_ACCESS_TOKEN, kernelRequestData, functionParams);
+      console.log({krnlPayload});
+
+      const decodedResponse = abiCoder.decode( ["bool"], krnlPayload.kernel_responses)
+      const decodedParams = abiCoder.decode( ["address", "uint256"], krnlPayload.kernel_params)
+      const decodedAuth = abiCoder.decode( 
+              ["bytes", "bytes32", "bytes", "uint256", "bool", ]
+      , krnlPayload.auth)
+
+      console.log({
+        reponse: decodedResponse.toArray(), 
+        params: decodedParams.toArray(),
+        auth: decodedAuth.toArray()
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to execute kernel');
-      }
-
-      const result = await response.json();
-      return {
-        auth: result.auth,
-        kernelResponses: result.kernel_responses,
-        kernelParams: result.kernel_params
-      };
+      return krnlPayload;
     } catch (err) {
       console.error('Kernel execution error:', err);
       throw err;
@@ -166,13 +168,39 @@ function App() {
         throw new Error('Failed to get KRNL payload');
       }
 
-      // Make the donation with KRNL payload
-      await donate({
-        address: contracts.limitedDonation.address,
-        abi: contracts.limitedDonation.abi,
-        functionName: 'donate',
-        args: [krnlPayload, amount],
-      });
+
+
+     const publicClient = createPublicClient({
+        chain: sepolia,
+        transport: http()
+      })
+
+      const args =  [{
+        auth: krnlPayload.auth as `0x${string}`,
+        kernelResponses: krnlPayload.kernel_responses as `0x${string}`,
+        kernelParams: krnlPayload.kernel_params as `0x${string}`
+      }, amount] as const
+
+      const res = true
+      // await publicClient.simulateContract({
+      //   address: contracts.limitedDonation.address,
+      //   abi: contracts.limitedDonation.abi,
+      //   functionName: 'donate',
+      //   args
+      // })
+      if (res){
+        await donate({
+          address: contracts.limitedDonation.address,
+          abi: contracts.limitedDonation.abi,
+          functionName: 'donate',
+          args
+        });
+      }
+
+
+      console.log({res});
+
+      
 
       setDonationAmount('');
     } catch (err) {
@@ -315,7 +343,7 @@ function App() {
                     disabled={isApproving || isDonating || !donationAmount}
                     className="btn btn-accent w-full"
                   >
-                    {isApproving ? 'Approving...' : isDonating ? 'Processing...' : 'Make Donation'}
+                    {isExecutingKernel ? 'Executing kernel...' : isApproving ? 'Approving...' : isDonating ? 'Processing...' : 'Make Donation'}
                   </button>
                 </div>
               </div>

@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useAccount, useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
-import { contracts } from '../config/wagmi';
+import { config, contracts } from '../config/wagmi';
+import { ethers } from 'krnl-sdk';
+import { waitForTransactionReceipt } from '@wagmi/core';
 
 export default function Faucet() {
   const [isRequesting, setIsRequesting] = useState(false);
@@ -21,12 +23,14 @@ export default function Faucet() {
     setError('');
 
     try {
-      await requestTokens({
-        address: contracts.tokenFaucet.address,
-        abi: contracts.tokenFaucet.abi,
-        functionName: 'requestTokens',
-        args: [],
+      const res = await requestTokens({
+        address: contracts.donationToken.address,
+        abi: contracts.donationToken.abi,
+        functionName: 'mint',
+        args: [address, ethers.parseEther("100")],
       });
+      await waitForTransactionReceipt(config, {hash: res, confirmations: 1})
+      window.location.reload();
     } catch (err) {
       console.error('Error requesting tokens:', err);
       setError(err instanceof Error ? err.message : 'Failed to request tokens');
