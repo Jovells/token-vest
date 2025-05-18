@@ -8,6 +8,7 @@ interface ImportMetaEnv {
   readonly VITE_KRNL_ACCESS_TOKEN: string;
   readonly VITE_TRANSACTION_LIMIT_KERNEL_ID: string;
   readonly VITE_RPC_URL: string;
+  readonly VITE_TOKEN_AUTHORITY_PUBLIC_KEY: string;
 }
 
 interface ImportMeta {

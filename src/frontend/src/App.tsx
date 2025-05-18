@@ -7,6 +7,7 @@ import { contracts } from './config/wagmi';
 import {ethers} from 'krnl-sdk'
 import './App.css';
 import Faucet from './components/Faucet';
+import { isAuthorized } from './authorization';
 
 // KRNL configuration
 const KRNL_ENTRY_ID = import.meta.env.VITE_KRNL_ENTRY_ID;
@@ -94,12 +95,10 @@ function App() {
     setIsExecutingKernel(true);
     try {
 
-      const parameterForKernel = abiCoder.encode(["address", "uint256"], [address, amount]);
-      const functionParams = abiCoder.encode(["uint256"], [amount]);
+  const functionParams = abiCoder.encode(["uint256"], [amount]);
+  const parameterForKernel = abiCoder.encode(["address", "uint256"], [`${address}`, amount]);
 
-
-      
-      const kernelRequestData = {
+  const kernelRequestData = {
         senderAddress: address,
         kernelPayload: {
           [KERNEL_ID]: {
@@ -108,23 +107,46 @@ function App() {
         }
       };
 
-      console.log({KRNL_ENTRY_ID, KRNL_ACCESS_TOKEN, kernelRequestData, functionParams})
+    console.log({KRNL_ENTRY_ID, KRNL_ACCESS_TOKEN, kernelRequestData, functionParams})
 
    
 
       const krnlPayload = await provider.executeKernels(KRNL_ENTRY_ID, KRNL_ACCESS_TOKEN, kernelRequestData, functionParams);
       console.log({krnlPayload});
 
-      const decodedResponse = abiCoder.decode( ["bool"], krnlPayload.kernel_responses)
-      const decodedParams = abiCoder.decode( ["address", "uint256"], krnlPayload.kernel_params)
+      const decodedResponse = abiCoder.decode( ["(uint256,bytes,string)[]"], krnlPayload.kernel_responses);
+      const decodedParams = abiCoder.decode( ["(uint8,bytes,string)[]"], krnlPayload.kernel_params);
       const decodedAuth = abiCoder.decode( 
               ["bytes", "bytes32", "bytes", "uint256", "bool", ]
-      , krnlPayload.auth)
+      , krnlPayload.auth);
+
+      const auth = await isAuthorized({
+        auth: krnlPayload.auth,
+        kernelParams: krnlPayload.kernel_params,
+        kernelResponses: krnlPayload.kernel_responses
+      }, functionParams, address);
+
+      console.log({auth})
+
+      const resParams = decodedParams[0][0][1];
+      const resResponse = decodedResponse[0][0][1];
+
+      const decodedResParams = abiCoder.decode( ["address", "uint256"], resParams)
+      const [addr, amt] = decodedResParams;
+      console.log({addr, amt: formatEther(amt)});
+
+     
+
+
+      // const decodedResResponse = abiCoder.decode( ["bool"], resResponse)
 
       console.log({
-        reponse: decodedResponse.toArray(), 
-        params: decodedParams.toArray(),
-        auth: decodedAuth.toArray()
+        resParams,
+        resResponse,
+        reponse: decodedResponse[0].toArray(), 
+        params: decodedParams[0].toArray(),
+        auth: decodedAuth.toArray(),
+        // decodedResResponse
       });
 
       return krnlPayload;
@@ -174,30 +196,31 @@ function App() {
 
      const publicClient = createPublicClient({
         chain: sepolia,
-        transport: http()
+        transport: http(sepolia.rpcUrls.default.http[0])
       })
-
       const args =  [{
+        
         auth: krnlPayload.auth as `0x${string}`,
         kernelResponses: krnlPayload.kernel_responses as `0x${string}`,
         kernelParams: krnlPayload.kernel_params as `0x${string}`
       }, amount] as const
 
-      const res = true
-      await publicClient.simulateContract({
+      let res: any 
+res = await publicClient.simulateContract({
         address: contracts.limitedDonation.address,
         abi: contracts.limitedDonation.abi,
         functionName: 'donate',
+        account: address,
         args
       })
-      if (res){
-        await donate({
+      console.log({simres: res})
+      res = await donate({
           address: contracts.limitedDonation.address,
           abi: contracts.limitedDonation.abi,
           functionName: 'donate',
           args
         });
-      }
+      
 
 
       console.log({res});
