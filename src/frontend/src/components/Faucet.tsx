@@ -1,57 +1,69 @@
 import { useState } from 'react';
-import { useAccount, useWaitForTransactionReceipt, useWriteContract } from 'wagmi';
-import { config, contracts } from '../config/wagmi';
-import { ethers } from 'krnl-sdk';
-import { waitForTransactionReceipt } from '@wagmi/core';
+import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { parseEther } from 'viem';
+import { contracts } from '../config/wagmi';
 
-export default function Faucet() {
-  const [isRequesting, setIsRequesting] = useState(false);
+const Faucet = () => {
+  const [amount, setAmount] = useState('100');
   const [error, setError] = useState('');
 
-  const { address } = useAccount();
+  const { writeContractAsync: mintDemo, data: mintData } = useWriteContract();
+  const { isLoading: isMinting } = useWaitForTransactionReceipt({ hash: mintData });
 
-  const { writeContractAsync: requestTokens, data: requestData } = useWriteContract();
+  const handleMint = async () => {
+    if (!amount) {
+      setError('Please enter an amount');
+      return;
+    }
 
-  const { isLoading } = useWaitForTransactionReceipt({
-    hash: requestData,
-  });
-
-  const handleRequestTokens = async () => {
-    if (!address) return;
-
-    setIsRequesting(true);
     setError('');
-
     try {
-      const res = await requestTokens({
-        address: contracts.donationToken.address,
-        abi: contracts.donationToken.abi,
-        functionName: 'mint',
-        args: [address, ethers.parseEther("100")],
+      await mintDemo({
+        address: contracts.vestedToken.address,
+        abi: contracts.vestedToken.abi,
+        functionName: 'mintDemo',
+        args: [parseEther(amount)],
       });
-      await waitForTransactionReceipt(config, {hash: res, confirmations: 1})
-      window.location.reload();
     } catch (err) {
-      console.error('Error requesting tokens:', err);
-      setError(err instanceof Error ? err.message : 'Failed to request tokens');
-    } finally {
-      setIsRequesting(false);
+      console.error('Mint error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to mint tokens');
     }
   };
 
   return (
-    <div className="bg-gray-50 p-4 rounded-lg">
-      <div className="text-sm text-gray-500 mb-2">Get Test Tokens</div>
-      <button
-        onClick={handleRequestTokens}
-        disabled={isRequesting || isLoading}
-        className="btn btn-primary w-full"
-      >
-        {isRequesting || isLoading ? 'Requesting...' : 'Request Tokens'}
-      </button>
+    <div className="p-6 bg-white rounded-lg shadow-md">
+      <h3 className="text-lg font-semibold mb-4">Demo Token Faucet</h3>
+      
       {error && (
-        <p className="mt-2 text-sm text-red-600">{error}</p>
+        <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+          {error}
+        </div>
       )}
+
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Amount to Mint
+          </label>
+          <input
+            type="number"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="100"
+          />
+        </div>
+
+        <button
+          onClick={handleMint}
+          disabled={isMinting || !amount}
+          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isMinting ? 'Minting...' : 'Mint Demo Tokens'}
+        </button>
+      </div>
     </div>
   );
-} 
+};
+
+export default Faucet; 

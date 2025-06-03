@@ -1,0 +1,121 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Project: Token Vesting Kernel & Multi-Token Claim Contract
+
+## Technology Stack
+- Solidity: Latest version for smart contracts
+- Hardhat: Latest version for Solidity development environment
+- OpenZeppelin: For ERC20 token implementation and security best practices
+- React: With Vite for frontend development
+- Tailwind CSS: For styling the frontend
+- KRNL SDK: For kernel integration with kOS
+
+## Deployment
+- Network: Sepolia testnet for both kernel and dApp
+- Registration: KRNL CLI for kernel registration
+
+## Code Structure
+- src/contracts/: Solidity smart contracts
+  - TokenVestingKernel.sol: The on-chain kernel contract (one schedule per token)
+  - VestedToken.sol: Demo ERC20 token
+  - TokenClaimContract.sol: Main claim contract integrating with kernel
+- src/frontend/: React Vite application
+- scripts/: Deployment and testing scripts
+- test/: Test files for contracts
+
+## Naming Conventions
+- Contracts: PascalCase (e.g., TokenVestingKernel)
+- Functions: camelCase (e.g., getVestedAmount)
+- Variables: camelCase (e.g., vestedAmount)
+- Constants: UPPER_SNAKE_CASE (e.g., MAX_VESTING_DURATION)
+
+## Design Guidelines
+- UI: Sleek, minimalist design that's unique and not cookie-cutter
+- UX: Simple and intuitive multi-token vesting and claiming process
+- Colors: Modern, clean palette
+- Multi-token support: Works with any ERC20 token
+
+## Security Requirements
+- Input validation on all user inputs
+- Protection against common smart contract vulnerabilities
+- Proper access control mechanisms
+- Secure integration with KRNL kernel
+- Multi-token security considerations
+
+## Testing
+- Unit tests for all contract functions
+- Integration tests for kernel-dApp interaction
+- Frontend component testing
+- Multi-token scenario testing
+
+## Task Tracking Rules
+- ALWAYS update TASK_LIST.md when starting a task by marking it as "🔄 In Progress"
+- ALWAYS update TASK_LIST.md when completing a task by marking it as "✅ Completed"
+- ALWAYS update TASK_LIST.md when modifying a task by adding notes about changes
+- Include timestamp and brief description when updating task status
+- If a task spawns subtasks, add them to the task list
+- If a task is blocked or needs modification, mark it as "⚠️ Blocked" with reason
+
+# KRNL Platform Integration Rules
+
+## Core KRNL Implementation Guidelines
+- `KrnlPayload` parameter MUST always come first in function declarations
+- Protected functions must use the `onlyAuthorized` modifier
+- Encode parameters in `onlyAuthorized` exactly as they appear in the function signature
+- Constructor must pass token authority public key to the KRNLImpl constructor
+
+## Kernel Response Handling
+- Always decode kernel responses as an array: `KernelResponse[] memory responses = abi.decode(krnlPayload.kernelResponses, (KernelResponse[]))`
+- Always check for errors before using the kernel result
+- Decode the kernel result with the appropriate type for each specific kernel
+
+## Token Vesting Architecture
+- One vesting schedule per token address (token address as identifier)
+- Multi-ERC20 support - works with any ERC20 token
+- Open permissions - anyone can create/edit schedules
+- Simple deposit/withdraw - only depositors can withdraw their tokens
+- Feature completeness prioritized over gas optimization
+
+## Standard Implementation Pattern
+```solidity
+// KRNL integration boilerplate for vesting
+contract TokenClaimContract is KRNL {
+    // Pass token authority public key to KRNLImpl constructor
+    constructor(address _tokenAuthorityPublicKey) KRNL(_tokenAuthorityPublicKey) {
+        // Contract initialization
+    }
+
+    // CORRECT: KrnlPayload parameter comes first
+    function claimTokens(
+        KrnlPayload memory krnlPayload,
+        address token,
+        uint256 amount
+    )
+        external
+        onlyAuthorized(krnlPayload, abi.encode(token, msg.sender))
+    {
+        // Decode responses array
+        KernelResponse[] memory kernelResponses = abi.decode(krnlPayload.kernelResponses, (KernelResponse[]));
+        
+        // Find the relevant kernel ID
+        for (uint i = 0; i < kernelResponses.length; i++) {
+            if (kernelResponses[i].kernelId == VESTING_KERNEL_ID) {
+                // Check for errors first
+                if (bytes(kernelResponses[i].err).length > 0) {
+                    revert("Kernel error");
+                }
+                
+                // Decode with specific type (vested amount)
+                uint256 vestedAmount = abi.decode(kernelResponses[i].result, (uint256));
+                
+                // Use the result for claim verification
+                // ...
+            }
+        }
+        
+        // Function logic
+    }
+} 

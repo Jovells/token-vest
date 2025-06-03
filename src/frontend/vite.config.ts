@@ -10,11 +10,17 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  define: {
+    global: 'globalThis',
+  },
+  optimizeDeps: {
+    include: ['clsx', 'tailwind-merge'],
+  },
   build: {
+    target: 'esnext',
+    minify: 'esbuild',
     rollupOptions: {
-      input: {
-        main: path.resolve(__dirname, 'src/main.tsx'),
-      },
+      external: [],
     },
   },
 }); 

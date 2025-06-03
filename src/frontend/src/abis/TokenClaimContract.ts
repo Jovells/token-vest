@@ -8,23 +8,8 @@ export default [
       },
       {
         "internalType": "uint256",
-        "name": "_kernelId",
+        "name": "_vestingKernelId",
         "type": "uint256"
-      },
-      {
-        "internalType": "address",
-        "name": "_kernelAddress",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_donationToken",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_charityAddress",
-        "type": "address"
       }
     ],
     "stateMutability": "nonpayable",
@@ -81,6 +66,22 @@ export default [
   },
   {
     "inputs": [],
+    "name": "ReentrancyGuardReentrantCall",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "name": "SafeERC20FailedOperation",
+    "type": "error"
+  },
+  {
+    "inputs": [],
     "name": "UnauthorizedTransaction",
     "type": "error"
   },
@@ -90,26 +91,7 @@ export default [
       {
         "indexed": true,
         "internalType": "address",
-        "name": "oldAddress",
-        "type": "address"
-      },
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "newAddress",
-        "type": "address"
-      }
-    ],
-    "name": "CharityAddressUpdated",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": true,
-        "internalType": "address",
-        "name": "donor",
+        "name": "token",
         "type": "address"
       },
       {
@@ -117,9 +99,15 @@ export default [
         "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "to",
+        "type": "address"
       }
     ],
-    "name": "DonationReceived",
+    "name": "EmergencyWithdrawal",
     "type": "event"
   },
   {
@@ -157,7 +145,7 @@ export default [
         "type": "uint256"
       }
     ],
-    "name": "KernelIdUpdated",
+    "name": "KernelUpdated",
     "type": "event"
   },
   {
@@ -180,17 +168,79 @@ export default [
     "type": "event"
   },
   {
-    "inputs": [],
-    "name": "charityAddress",
-    "outputs": [
+    "anonymous": false,
+    "inputs": [
       {
+        "indexed": true,
         "internalType": "address",
-        "name": "",
+        "name": "claimer",
         "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
       }
     ],
-    "stateMutability": "view",
-    "type": "function"
+    "name": "TokensClaimed",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "depositor",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "TokensDeposited",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "withdrawer",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "TokensWithdrawn",
+    "type": "event"
   },
   {
     "inputs": [
@@ -217,33 +267,60 @@ export default [
         "type": "tuple"
       },
       {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      },
+      {
         "internalType": "uint256",
         "name": "amount",
         "type": "uint256"
       }
     ],
-    "name": "donate",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
+    "name": "claimTokens",
+    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "donationToken",
-    "outputs": [
+    "inputs": [
       {
-        "internalType": "contract IERC20",
-        "name": "",
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "depositTokens",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "to",
         "type": "address"
       }
     ],
-    "stateMutability": "view",
+    "name": "emergencyWithdraw",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -260,6 +337,97 @@ export default [
         "internalType": "bool",
         "name": "",
         "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "name": "getContractBalance",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "name": "getUserClaimedAmount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "name": "getUserClaims",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      }
+    ],
+    "name": "getUserDeposits",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -312,8 +480,14 @@ export default [
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "totalDonations",
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "totalClaims",
     "outputs": [
       {
         "internalType": "uint256",
@@ -325,21 +499,14 @@ export default [
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "transactionLimitKernelAddress",
-    "outputs": [
+    "inputs": [
       {
         "internalType": "address",
         "name": "",
         "type": "address"
       }
     ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "transactionLimitKernelId",
+    "name": "totalDeposits",
     "outputs": [
       {
         "internalType": "uint256",
@@ -366,32 +533,6 @@ export default [
   {
     "inputs": [
       {
-        "internalType": "address",
-        "name": "_newCharityAddress",
-        "type": "address"
-      }
-    ],
-    "name": "updateCharityAddress",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_newKernelAddress",
-        "type": "address"
-      }
-    ],
-    "name": "updateKernelAddress",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "uint256",
         "name": "_newKernelId",
         "type": "uint256"
@@ -408,9 +549,14 @@ export default [
         "internalType": "address",
         "name": "",
         "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
       }
     ],
-    "name": "userDonations",
+    "name": "userClaims",
     "outputs": [
       {
         "internalType": "uint256",
@@ -419,6 +565,61 @@ export default [
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "userDeposits",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "vestingKernelId",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "token",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "withdrawTokens",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   }
 ] as const;

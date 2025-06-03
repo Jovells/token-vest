@@ -1,17 +1,18 @@
 {
-    "name": "transaction-limit-kernel",
+    "name": "token-vesting-kernel",
     "version": "1.0.0",
-    "description": "A KRNL implementation for limiting transactions to 100 tokens per day",
+    "description": "KRNL Demo Platform - Token Vesting Kernel & Multi-Token Claim Contract showcasing real-world KRNL integration patterns for secure, cross-chain token distribution systems",
     "main": "index.js",
     "scripts": {
         "compile": "hardhat compile",
-        "test": "hardhat test",
-        "deploy:kernel": "hardhat run scripts/deploy-kernel.js --network sepolia",
-        "deploy:donation": "hardhat run scripts/deploy-donation.js --network sepolia",
-        "verify:kernel": "hardhat run scripts/verify-kernel.js --network sepolia",
-        "verify:donation": "hardhat run scripts/verify-donation.js --network sepolia",
-        "deploy:all": "npm run deploy:kernel && npm run deploy:donation && npm run deploy:faucet",
-        "verify:all": "npm run verify:kernel && npm run verify:donation && npm run verify:faucet",
+        "deploy:vesting-kernel": "hardhat run scripts/deploy-vesting-kernel.js --network baseSepolia",
+        "deploy:vested-token": "hardhat run scripts/deploy-vested-token.js --network sepolia",
+        "deploy:claim-contract": "hardhat run scripts/deploy-claim-contract.js --network sepolia",
+        "verify:vesting-kernel": "hardhat run scripts/verify-vesting-kernel.js --network baseSepolia",
+        "verify:vested-token": "hardhat run scripts/verify-vested-token.js --network sepolia",
+        "verify:claim-contract": "hardhat run scripts/verify-claim-contract.js --network sepolia",
+        "deploy:all": "hardhat run scripts/deploy-all.js",
+        "verify:all": "npm run verify:vesting-kernel && npm run verify:vested-token && npm run verify:claim-contract",
         "generate:abis": "hardhat compile && node scripts/generate-abis.js",
         "frontend": "cd src/frontend && npm run dev"
     },
@@ -19,7 +20,9 @@
         "krnl",
         "ethereum",
         "hardhat",
-        "solidity"
+        "solidity",
+        "vesting",
+        "tokens"
     ],
     "author": "",
     "license": "MIT",
