@@ -385,93 +385,70 @@ export function ScheduleForm() {
 
 #### UI Design Principles
 
-##### Modular Component Architecture
+##### Component Architecture with RainbowKit Integration
 ```typescript
-// Clean separation of concerns in admin interface
-const AdminInterface = () => (
-  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-    <AdminCard title="Create Vesting Schedule">
-      <ScheduleForm />  {/* Encapsulates all form logic and chain switching */}
-    </AdminCard>
-    
-    <AdminCard title="Schedule Information">
-      <ScheduleInfo />  {/* Focused on display and real-time data */}
-    </AdminCard>
-  </div>
-)
+// Updated layout with RainbowKit and minimal dark mode
+const Layout = ({ children, currentView, onViewChange }) => (
+  <div className="flex min-h-screen bg-gray-50 dark:bg-gray-950">
+    {/* Fixed Top Navbar */}
+    <header className="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-950 border-b border-gray-200 dark:border-gray-800">
+      <div className="flex items-center justify-between px-4 sm:px-6 h-16">
+        {/* Logo + Mobile Menu */}
+        <div className="flex items-center space-x-4">
+          <MobileMenuButton />
+          <Logo />
+        </div>
 
-// Dedicated ScheduleForm with integrated functionality
-const ScheduleForm = () => (
-  <div>
-    <NetworkWarning />     {/* Base Sepolia chain switching */}
-    <TemplateSection />    {/* Quick template selection */}
-    <FormFields />         {/* Schedule parameters */}
-    <SubmitButton />       {/* Transaction handling */}
-  </div>
-)
-
-##### Chain Switching Implementation
-```typescript
-// Consistent chain switching pattern across components
-const useChainSwitching = (targetChain: Chain) => {
-  const { switchChain } = useSwitchChain()
-  
-  const handleSwitch = async () => {
-    try {
-      await switchChain({ chainId: targetChain.id })
-    } catch (error) {
-      console.error(`Failed to switch to ${targetChain.name}:`, error)
-      toast.error(`Failed to switch to ${targetChain.name} network`)
-    }
-  }
-  
-  return { handleSwitch }
-}
-
-// Network warning component pattern
-const NetworkWarning = ({ targetChain, currentChain, onSwitch }) => (
-  !isCorrectChain && (
-    <motion.div className="p-4 bg-amber-50 rounded-lg">
-      <div className="flex items-center justify-between">
-        <span>Switch to {targetChain.name} network</span>
-        <Button onClick={onSwitch}>Switch Network</Button>
+        {/* Navbar Actions */}
+        <div className="flex items-center space-x-3">
+          <NetworkBadge />           {/* Chain indicator */}
+          <ThemeToggle />            {/* Light/Dark toggle */}
+          <ConnectButton />          {/* RainbowKit wallet button */}
+        </div>
       </div>
-    </motion.div>
-  )
+    </header>
+
+    {/* Responsive Sidebar */}
+    <Sidebar />
+    
+    {/* Main Content */}
+    <main className="flex-1 lg:pl-72 pt-16">
+      {children}
+    </main>
+  </div>
 )
-```
 
-##### Component Responsibilities
+// RainbowKit Integration Pattern
+const WalletIntegration = () => (
+  <WagmiProvider config={config}>
+    <QueryClientProvider client={queryClient}>
+      <RainbowKitProvider>
+        <App />
+      </RainbowKitProvider>
+    </QueryClientProvider>
+  </WagmiProvider>
+)
+
+##### Responsive Mobile Design
 ```typescript
-// Admin Page: Layout and orchestration only
-export function Admin() {
-  return (
-    <div className="space-y-8">
-      <TokenSelector />           {/* Token selection */}
-      <AdminGrid>                 {/* Layout management */}
-        <ScheduleForm />          {/* Self-contained form */}
-        <ScheduleInfo />          {/* Self-contained display */}
-      </AdminGrid>
-    </div>
-  )
-}
+// Mobile-optimized switch buttons
+const MobileNetworkButton = () => (
+  <Button className="whitespace-nowrap flex-shrink-0">
+    <span className="hidden sm:inline">Switch to Sepolia</span>
+    <span className="sm:hidden">Switch Network</span>
+  </Button>
+)
 
-// ScheduleForm: Complete form functionality
-export function ScheduleForm() {
-  // All form state and logic encapsulated here
-  const [form, setForm] = useState(...)
-  const { isBaseSepolia } = useVesting('')
-  const { switchChain } = useSwitchChain()
-  
-  return (
-    <div className="space-y-6">
-      <NetworkGuard targetChain={baseSepolia} />
-      <Templates onSelect={handleTemplateSelect} />
-      <FormFields form={form} setForm={setForm} />
-      <SubmitButton onSubmit={handleSubmit} />
+// Responsive network warning layout
+const NetworkWarning = () => (
+  <div className="flex items-center justify-between gap-3">
+    <div className="flex items-center space-x-2 flex-1 min-w-0">
+      <Icon className="flex-shrink-0" />
+      <span className="truncate">Network message</span>
     </div>
-  )
-}
+    <MobileNetworkButton />
+  </div>
+)
 ```
 
 #### State Management Patterns

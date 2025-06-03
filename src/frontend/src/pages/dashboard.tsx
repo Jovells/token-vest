@@ -12,14 +12,14 @@ export function Dashboard() {
 
   return (
     <div className="space-y-8">
-      {/* Welcome Header */}
+      {/* Clean Welcome Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="text-center py-8"
       >
         <div className="max-w-2xl mx-auto">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">
+          <h1 className="text-4xl font-semibold text-gray-900 dark:text-white mb-4">
             Welcome to TokenVest
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
@@ -30,23 +30,23 @@ export function Dashboard() {
         </div>
       </motion.div>
 
-      {/* Token Selector Card */}
+      {/* Clean Token Selector Card */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
       >
-        <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm rounded-2xl overflow-hidden">
-          <CardHeader className="bg-gradient-to-r from-[#001efe]/10 to-blue-50 dark:from-[#001efe]/20 dark:to-blue-900/30 border-b border-gray-100 dark:border-gray-700">
+        <Card className="overflow-hidden">
+          <CardHeader className="bg-gray-50 dark:bg-gray-950 border-b border-gray-200 dark:border-gray-700">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-[#001efe] rounded-xl flex items-center justify-center">
-                <Target className="h-5 w-5 text-white" />
+              <div className="w-10 h-10 bg-gray-100 dark:bg-gray-900 rounded-lg flex items-center justify-center">
+                <Target className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <CardTitle className="text-xl text-gray-900 dark:text-white">
+                <CardTitle className="text-xl">
                   Token Selection
                 </CardTitle>
-                <CardDescription className="text-gray-600 dark:text-gray-400">
+                <CardDescription>
                   Choose a token to experience KRNL-powered vesting and claims
                 </CardDescription>
               </div>
@@ -67,8 +67,8 @@ export function Dashboard() {
           className="text-center py-16"
         >
           <div className="max-w-md mx-auto">
-            <div className="w-20 h-20 bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900 dark:to-purple-900 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Coins className="h-10 w-10 text-[#001efe]" />
+            <div className="w-20 h-20 bg-gray-100 dark:bg-gray-950 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Coins className="h-10 w-10 text-primary" />
             </div>
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               Select a Token to Experience KRNL
@@ -93,27 +93,27 @@ export function Dashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Left Column: Token Claims + Token Operations */}
             <div className="space-y-8">
-              {/* KRNL Claim Feature - Prominent but not full width */}
+              {/* KRNL Claim Feature - Clean highlight */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
                 className="relative"
               >
-                {/* Highlight glow effect */}
-                <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-blue-500/20 rounded-2xl blur opacity-75"></div>
+                {/* Subtle highlight border */}
+                <div className="absolute -inset-0.5 bg-primary/10 rounded-lg"></div>
                 
-                <Card className="relative bg-white dark:bg-gray-800 border-2 border-primary/20 shadow-lg rounded-2xl overflow-hidden">
-                  <CardHeader className="bg-gradient-to-r from-[#001efe]/10 to-blue-50 dark:from-[#001efe]/20 dark:to-blue-900/30 border-b border-gray-100 dark:border-gray-700">
+                <Card className="relative border-primary/20 overflow-hidden">
+                  <CardHeader className="bg-gray-50 dark:bg-gray-950 border-b border-gray-200 dark:border-gray-700">
                     <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-[#001efe] rounded-xl flex items-center justify-center">
-                        <Zap className="h-6 w-6 text-white" />
+                      <div className="w-12 h-12 bg-gray-100 dark:bg-gray-900 rounded-lg flex items-center justify-center">
+                        <Zap className="h-6 w-6 text-primary" />
                       </div>
                       <div>
-                        <CardTitle className="text-2xl text-gray-900 dark:text-white flex items-center space-x-2">
+                        <CardTitle className="text-2xl flex items-center space-x-2">
                           <span>Token Claims</span>
                         </CardTitle>
-                        <CardDescription className="text-gray-600 dark:text-gray-400 text-base">
+                        <CardDescription className="text-base">
                           Experience secure, cross-chain token claiming powered by KRNL kernels
                         </CardDescription>
                       </div>
@@ -125,23 +125,23 @@ export function Dashboard() {
                 </Card>
               </motion.div>
 
-              {/* Token Operations - Below Claims */}
+              {/* Token Operations - Clean design */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.4 }}
               >
-                <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm rounded-2xl overflow-hidden">
-                  <CardHeader className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-700 dark:to-gray-800 border-b border-gray-100 dark:border-gray-700">
+                <Card className="overflow-hidden">
+                  <CardHeader className="bg-gray-50 dark:bg-gray-950 border-b border-gray-200 dark:border-gray-700">
                     <div className="flex items-center space-x-3">
-                      <div className="w-10 h-10 bg-gradient-to-br from-gray-500 to-gray-600 rounded-xl flex items-center justify-center">
-                        <Wallet className="h-5 w-5 text-white" />
+                      <div className="w-10 h-10 bg-gray-100 dark:bg-gray-900 rounded-lg flex items-center justify-center">
+                        <Wallet className="h-5 w-5 text-gray-600 dark:text-gray-400" />
                       </div>
                       <div>
-                        <CardTitle className="text-xl text-gray-900 dark:text-white">
+                        <CardTitle className="text-xl">
                           Token Management
                         </CardTitle>
-                        <CardDescription className="text-gray-600 dark:text-gray-400">
+                        <CardDescription>
                           Deposit and withdraw tokens for the claim pool
                         </CardDescription>
                       </div>
@@ -160,17 +160,17 @@ export function Dashboard() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.5 }}
             >
-              <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm rounded-2xl overflow-hidden h-fit">
-                <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 border-b border-gray-100 dark:border-gray-700">
+              <Card className="overflow-hidden h-fit">
+                <CardHeader className="bg-gray-50 dark:bg-gray-950 border-b border-gray-200 dark:border-gray-700">
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
-                      <Coins className="h-5 w-5 text-white" />
+                    <div className="w-10 h-10 bg-gray-100 dark:bg-gray-900 rounded-lg flex items-center justify-center">
+                      <Coins className="h-5 w-5 text-success" />
                     </div>
                     <div>
-                      <CardTitle className="text-xl text-gray-900 dark:text-white">
+                      <CardTitle className="text-xl">
                         Vesting Information
                       </CardTitle>
-                      <CardDescription className="text-gray-600 dark:text-gray-400">
+                      <CardDescription>
                         Real-time vesting progress and balance tracking
                       </CardDescription>
                     </div>

@@ -115,17 +115,6 @@ export function ScheduleForm() {
             <Calendar className="h-5 w-5 text-primary" />
             <span>Create Vesting Schedule</span>
           </div>
-          {!isBaseSepolia && (
-            <Button 
-              variant="destructive" 
-              size="sm"
-              onClick={handleSwitchToBaseSepolia}
-              className="animate-pulse"
-            >
-              <AlertTriangle className="mr-1 h-3 w-3" />
-              Switch to Base Sepolia
-            </Button>
-          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">

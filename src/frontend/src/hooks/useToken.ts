@@ -68,7 +68,7 @@ export function useTokenData(tokenAddress: string) {
   })
 
   // Read user's claims for specific token
-  const { data: userClaims } = useReadContract({
+  const { data: userClaims, error: userClaimsError } = useReadContract({
     address: contracts.tokenClaimContract.address,
     abi: contracts.tokenClaimContract.abi,
     functionName: 'getUserClaims',
@@ -78,6 +78,8 @@ export function useTokenData(tokenAddress: string) {
       enabled: !!address && !!tokenAddress,
     },
   })
+
+  console.log("userClaims", userClaims, userClaimsError)
 
   // Read token balance - try to read for any ERC20 token
   const { data: tokenBalance, error, isFetching, isFetched } = useReadContract({

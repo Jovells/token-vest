@@ -165,7 +165,7 @@ export function TokenSelector() {
       {/* Token Selector */}
       <div className="min-w-[200px]">
         <Select value={selectedToken} onValueChange={handleTokenSelect}>
-          <SelectTrigger className="h-12 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 hover:border-[#001efe] rounded-xl shadow-sm transition-all duration-200">
+          <SelectTrigger className="h-12 bg-white dark:bg-gray-950 border-gray-200 dark:border-gray-600 hover:border-[#001efe] rounded-xl shadow-sm transition-all duration-200">
             {selectedDisplay ? (
               <div className="flex items-center space-x-3">
                 <div className={`w-8 h-8 bg-gradient-to-br ${selectedDisplay.gradient} rounded-full flex items-center justify-center`}>
@@ -178,7 +178,7 @@ export function TokenSelector() {
               </div>
             ) : (
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-gray-100 dark:bg-gray-900 rounded-full flex items-center justify-center">
                   <Coins className="h-4 w-4 text-gray-600 dark:text-gray-300" />
                 </div>
                 <div className="text-left">
@@ -187,7 +187,7 @@ export function TokenSelector() {
               </div>
             )}
           </SelectTrigger>
-          <SelectContent className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 shadow-xl rounded-xl">
+          <SelectContent className="bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-600 shadow-xl rounded-xl">
             {/* VEST Token (always first) */}
             <SelectItem value={contracts.vestedToken.address} className="p-3 rounded-lg">
               <div className="flex items-center justify-between w-full">
@@ -231,7 +231,7 @@ export function TokenSelector() {
             {/* Custom token option */}
             <SelectItem value="custom" className="p-3 rounded-lg">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-gray-100 dark:bg-gray-900 rounded-full flex items-center justify-center">
                   <Plus className="h-4 w-4 text-gray-600 dark:text-gray-300" />
                 </div>
                 <div>
@@ -245,13 +245,13 @@ export function TokenSelector() {
 
         {/* Custom token input */}
         {showCustomInput && (
-          <div className="mt-3 space-y-2 p-3 border rounded-xl bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-600">
+          <div className="mt-3 space-y-2 p-3 border rounded-xl bg-gray-50 dark:bg-gray-950 border-gray-200 dark:border-gray-600">
             <Label className="text-xs font-medium text-gray-700 dark:text-gray-300">Custom Token Address</Label>
             <Input
               placeholder="0x..."
               value={customTokenAddress}
               onChange={(e) => setCustomTokenAddress(e.target.value)}
-              className="text-xs rounded-lg border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700"
+              className="text-xs rounded-lg border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-900"
             />
             <div className="flex space-x-2">
               <Button
@@ -293,7 +293,7 @@ export function TokenSelector() {
       {/* Mint Dialog - Fixed positioning */}
       {showMintDialog && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-6 max-h-[90vh] overflow-y-auto my-auto">
+          <div className="bg-white dark:bg-gray-950 rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-6 max-h-[90vh] overflow-y-auto my-auto">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
                 <Coins className="h-5 w-5 text-white" />
@@ -322,7 +322,7 @@ export function TokenSelector() {
                 onChange={(e) => setMintAmount(e.target.value)}
                 max="1000"
                 min="1"
-                className="h-12 rounded-xl border-gray-200 dark:border-gray-600 focus:border-[#001efe] focus:ring-[#001efe] bg-white dark:bg-gray-700"
+                className="h-12 rounded-xl border-gray-200 dark:border-gray-600 focus:border-[#001efe] focus:ring-[#001efe] bg-white dark:bg-gray-900"
               />
               {Number(mintAmount) > 1000 && (
                 <p className="text-xs text-red-500">Maximum mint amount is 1000 tokens</p>

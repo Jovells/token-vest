@@ -5,48 +5,72 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 233 100% 50%; /* #001efe */
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222.2 84% 4.9%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96%;
-    --accent-foreground: 222.2 84% 4.9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 233 100% 50%; /* #001efe */
-    --radius: 0.75rem;
+    /* Grayscale Foundation (90% of UI) - Uber/Airbnb Style */
+    --background: 0 0% 100%;              /* Pure white */
+    --foreground: 215 19% 35%;            /* Primary text - gray-600 */
+    --card: 0 0% 100%;                    /* White cards */
+    --card-foreground: 215 19% 35%;       /* Gray-600 text on cards */
+    --popover: 0 0% 100%;                 /* White popovers */
+    --popover-foreground: 215 19% 35%;    /* Gray-600 text */
+    
+    /* Single Primary Color (10% of UI) - KRNL Blue for accents only */
+    --primary: 233 100% 50%;              /* #001EFE - KRNL blue */
+    --primary-foreground: 0 0% 100%;      /* White text on primary */
+    
+    /* Grayscale Variants */
+    --secondary: 210 17% 96%;             /* Gray-100 backgrounds */
+    --secondary-foreground: 215 19% 35%;  /* Gray-600 text */
+    --muted: 210 17% 96%;                 /* Gray-100 muted areas */
+    --muted-foreground: 215 8% 47%;       /* Gray-500 muted text */
+    --accent: 210 17% 96%;                /* Gray-100 accent areas */
+    --accent-foreground: 215 19% 35%;     /* Gray-600 accent text */
+    
+    /* Functional Colors (Minimal usage) */
+    --destructive: 0 84% 60%;             /* Single red for errors */
+    --destructive-foreground: 0 0% 100%;  /* White text on red */
+    --success: 142 71% 45%;               /* Single green for success */
+    --warning: 38 92% 50%;                /* Single amber for warnings */
+    
+    /* Grayscale Borders and Inputs */
+    --border: 214 32% 91%;                /* Gray-200 borders */
+    --input: 214 32% 91%;                 /* Gray-200 input borders */
+    --ring: 233 100% 50%;                 /* Primary blue for focus rings */
+    
+    /* Consistent Border Radius - 8px base */
+    --radius: 0.5rem;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 233 100% 50%; /* #001efe */
-    --primary-foreground: 210 40% 98%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 233 100% 50%; /* #001efe */
+    /* Dark Mode - Pure Black Foundation */
+    --background: 0 0% 0%;                /* Pure black */
+    --foreground: 0 0% 90%;               /* Light gray-100 text */
+    --card: 0 0% 7%;                      /* One shade above black - gray-950 equivalent */
+    --card-foreground: 0 0% 90%;          /* Light text on cards */
+    --popover: 0 0% 7%;                   /* Same as cards */
+    --popover-foreground: 0 0% 90%;       /* Light text */
+    
+    /* Primary remains the same in dark mode */
+    --primary: 233 100% 50%;              /* #001EFE - KRNL blue */
+    --primary-foreground: 0 0% 100%;      /* White text on primary */
+    
+    /* Dark Grayscale Variants - Minimal shades */
+    --secondary: 0 0% 7%;                 /* Same as cards */
+    --secondary-foreground: 0 0% 90%;     /* Light text */
+    --muted: 0 0% 7%;                     /* Same as cards */
+    --muted-foreground: 0 0% 70%;         /* Slightly dimmed text */
+    --accent: 0 0% 7%;                    /* Same as cards */
+    --accent-foreground: 0 0% 90%;        /* Light accent text */
+    
+    /* Dark Mode Functional Colors */
+    --destructive: 0 63% 31%;             /* Darker red for dark mode */
+    --destructive-foreground: 0 0% 90%;   /* Light text on red */
+    --success: 142 71% 45%;               /* Same green works in dark */
+    --warning: 38 92% 50%;                /* Same amber works in dark */
+    
+    /* Dark Borders and Inputs - Minimal contrast */
+    --border: 0 0% 15%;                   /* Subtle border */
+    --input: 0 0% 15%;                    /* Subtle input borders */
+    --ring: 233 100% 50%;                 /* Primary blue for focus rings */
   }
 
   * {
@@ -61,7 +85,7 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* Scrollbar styling */
+  /* Clean scrollbar styling - minimal */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -72,16 +96,16 @@
   }
 
   ::-webkit-scrollbar-thumb {
-    @apply bg-border rounded-full;
+    @apply bg-gray-300 dark:bg-gray-600 rounded-full;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-muted-foreground/50;
+    @apply bg-gray-400 dark:bg-gray-500;
   }
 }
 
 @layer components {
-  /* Custom animations for enhanced UX */
+  /* Minimal shimmer animation */
   @keyframes shimmer {
     0% {
       background-position: -200px 0;
@@ -102,23 +126,13 @@
     background-size: 200px 100%;
   }
 
-  /* Custom component styles */
-  .glass-card {
-    @apply backdrop-blur-xl bg-white/80 dark:bg-gray-900/80 border border-white/20 dark:border-gray-800/50;
+  /* Clean card component - no more glass effects */
+  .clean-card {
+    @apply bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg shadow-sm;
   }
 
-  .gradient-border {
-    @apply relative;
-  }
-
-  .gradient-border::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    padding: 1px;
-    background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--accent)));
-    border-radius: inherit;
-    mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-    mask-composite: xor;
+  /* Remove gradient borders - use simple borders only */
+  .simple-border {
+    @apply border border-gray-200 dark:border-gray-800;
   }
 }

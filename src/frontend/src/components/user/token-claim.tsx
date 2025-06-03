@@ -35,7 +35,7 @@ export function TokenClaim() {
 
   if (!selectedToken) {
     return (
-      <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
+      <Card className=" bg-gradient-to-br from-primary/5 to-primary/10">
         <CardContent className="flex items-center justify-center h-48">
           <div className="text-center text-muted-foreground">
             <Coins className="mx-auto h-12 w-12 opacity-50 mb-2" />
@@ -81,13 +81,10 @@ export function TokenClaim() {
   const availableToClaim = calculateAvailableToClaim(vestedAmount, userClaims)
 
   return (
-    <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
+    <Card className=" bg-white dark:bg-gray-950">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <Coins className="h-4 w-4 text-primary-foreground" />
-            </div>
             <div>
               <span className="text-lg">Claim Vested Tokens</span>
               <div className="flex items-center space-x-2 mt-1">
@@ -102,16 +99,6 @@ export function TokenClaim() {
               </div>
             </div>
           </div>
-          {!isSepolia && (
-            <Button 
-              variant="destructive" 
-              size="sm"
-              onClick={handleSwitchToSepolia}
-              className="animate-pulse"
-            >
-              Switch to Sepolia
-            </Button>
-          )}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -135,10 +122,10 @@ export function TokenClaim() {
             animate={{ opacity: 1, y: 0 }}
             className="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg"
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2 text-amber-800 dark:text-amber-200">
-                <Coins className="h-4 w-4" />
-                <span className="text-sm font-medium">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center space-x-2 text-amber-800 dark:text-amber-200 flex-1 min-w-0">
+                <Coins className="h-4 w-4 flex-shrink-0" />
+                <span className="text-sm font-medium truncate">
                   Switch to Sepolia network to claim tokens
                 </span>
               </div>
@@ -146,9 +133,10 @@ export function TokenClaim() {
                 variant="outline" 
                 size="sm"
                 onClick={handleSwitchToSepolia}
-                className="text-amber-800 border-amber-300 hover:bg-amber-100"
+                className="text-amber-800 border-amber-300 hover:bg-amber-100 whitespace-nowrap flex-shrink-0"
               >
-                Switch Network
+                <span className="hidden sm:inline">Switch Network</span>
+                <span className="sm:hidden">Switch</span>
               </Button>
             </div>
           </motion.div>

@@ -107,11 +107,6 @@ export function TokenActions() {
             <Coins className="h-5 w-5 text-primary" />
             <span>Token Actions</span>
           </div>
-          {!isSepolia && (
-            <Badge variant="destructive" className="text-xs">
-              Switch to Sepolia
-            </Badge>
-          )}
         </CardTitle>
       </CardHeader>
       <CardContent>

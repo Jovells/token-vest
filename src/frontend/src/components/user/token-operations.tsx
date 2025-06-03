@@ -84,18 +84,8 @@ export function TokenOperations() {
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <Wallet className="h-5 w-5 text-primary" />
             <span>Token Operations</span>
           </div>
-          {!isSepolia && (
-            <Button 
-              variant="destructive" 
-              size="sm"
-              onClick={handleSwitchToSepolia}
-            >
-              Switch to Sepolia
-            </Button>
-          )}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -117,9 +107,10 @@ export function TokenOperations() {
                 variant="outline" 
                 size="sm"
                 onClick={handleSwitchToSepolia}
-                className="text-amber-800 border-amber-300 hover:bg-amber-100"
+                className="text-amber-800 border-amber-300 hover:bg-amber-100 whitespace-nowrap flex-shrink-0"
               >
-                Switch Network
+                <span className="hidden sm:inline">Switch to Sepolia</span>
+                <span className="sm:hidden">Switch Network</span>
               </Button>
             </div>
           </motion.div>

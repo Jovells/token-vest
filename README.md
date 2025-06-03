@@ -2,9 +2,9 @@
 
 ## Introduction
 
-Ready to dive into decentralized finance with a twist? In this tutorial, we’ll build a **token vesting platform** powered by **KRNL**, a cutting-edge platform that makes cross-chain verification secure and seamless. By the end, you’ll have a production-ready app that manages token vesting schedules on Base Sepolia and processes claims on Sepolia, all tied together with a modern React frontend.
+Ready to dive into decentralized finance with a twist? In this tutorial, we'll build a **token vesting platform** powered by **KRNL**, a cutting-edge platform that makes cross-chain verification secure and seamless. By the end, you'll have a production-ready app that manages token vesting schedules on Base Sepolia and processes claims on Sepolia, all tied together with a modern React frontend.
 
-Whether you’re new to blockchain or a seasoned developer, we’ve got you covered with clear explanations, practical tips, and solutions to common pitfalls. Let’s get started!
+Whether you're new to blockchain or a seasoned developer, we've got you covered with clear explanations, practical tips, and solutions to common pitfalls. Let's get started!
 
 ## Why KRNL?
 
@@ -14,26 +14,37 @@ KRNL is like a universal translator for blockchains. It allows smart contracts o
 - **Transparent Logic**: All verification is on-chain and auditable.
 - **Flexibility**: Separates verification from execution for better security.
 
-## What We’re Building
+## What We're Building
 
-We’re creating a token vesting platform where:
+We're creating a token vesting platform where:
 - **Admins** set vesting schedules on Base Sepolia using `TokenVestingKernel`.
 - **Users** claim tokens on Sepolia via `TokenClaimContract`, with KRNL verifying eligibility.
 - A **React frontend** makes it easy to interact with the contracts.
 - KRNL ensures secure cross-chain communication.
 
-Here’s the architecture in simple terms:
+Here's the architecture in simple terms:
 
-| Component            | Network       | Role                                      |
-|----------------------|---------------|-------------------------------------------|
+| Component             | Network       | Purpose                                   |
+|-----------------------|---------------|-------------------------------------------|
 | TokenVestingKernel   | Base Sepolia  | Manages vesting schedules                |
 | TokenClaimContract   | Sepolia       | Handles token claims with KRNL verification |
-| React Frontend        | Sepolia       | User interface for claims and deposits    |
+| React Frontend        | Sepolia       | User interface with RainbowKit wallet connection |
 | KRNL Platform        | Cross-Chain   | Verifies data across networks             |
+
+## Technology Stack
+
+- **Solidity**: Latest version for smart contracts
+- **Hardhat**: Latest version for Solidity development environment  
+- **OpenZeppelin**: For ERC20 token implementation and security best practices
+- **React**: With Vite for frontend development
+- **Tailwind CSS**: For styling the frontend
+- **RainbowKit**: Modern wallet connection interface with multi-wallet support
+- **Wagmi v2**: React hooks for Ethereum interactions
+- **KRNL SDK**: For kernel integration with kOS
 
 ## Prerequisites
 
-You’ll need:
+You'll need:
 - Basic knowledge of **Solidity**, **React**, and blockchain concepts.
 - **Node.js 18+** and npm.
 - **MetaMask** configured for Sepolia and Base Sepolia testnets.
@@ -45,7 +56,7 @@ You’ll need:
 
 ## Part 1: Project Setup
 
-Let’s set up the project structure and environment.
+Let's set up the project structure and environment.
 
 1. **Initialize the Project**:
    ```bash
@@ -104,7 +115,7 @@ Let’s set up the project structure and environment.
 
 ## Part 2: Smart Contract Development
 
-Let’s build the core smart contracts. We’ll focus on the key functions for KRNL integration.
+Let's build the core smart contracts. We'll focus on the key functions for KRNL integration.
 
 ### 2.1 TokenVestingKernel.sol (Base Sepolia)
 
@@ -131,7 +142,7 @@ function getVestedAmount(address token, address user) public view returns (uint2
 
 **What It Does**:
 - Checks if the user is eligible and the schedule is active.
-- Returns 0 if the vesting hasn’t started or is in the cliff period.
+- Returns 0 if the vesting hasn't started or is in the cliff period.
 - Calculates the vested amount based on time elapsed since the cliff ended.
 
 **Common Errors**:
@@ -188,7 +199,7 @@ function claimTokens(
 
 **Common Errors**:
 - **Parameter Order**: `krnlPayload` must be the first parameter.
-- **Encoding Mismatch**: `abi.encode(token, amount)` must match `claimTokens`’s signature (`address`, `uint256`).
+- **Encoding Mismatch**: `abi.encode(token, amount)` must match `claimTokens`'s signature (`address`, `uint256`).
 - **Kernel Errors**: Always check `responses[i].err` to avoid processing invalid results.
 - **Insufficient Balance**: Ensure the contract has enough tokens to transfer.
 
@@ -196,7 +207,7 @@ function claimTokens(
 
 ## Part 3: Frontend Development
 
-Let’s build the React frontend to interact with our contracts, focusing on KRNL integration.
+Let's build the React frontend to interact with our contracts, focusing on KRNL integration.
 
 ### 3.1 Setting Up the Frontend
 
@@ -299,7 +310,7 @@ To use KRNL:
 
 ## Conclusion
 
-You’ve built a secure, KRNL-powered token vesting platform! This project showcases decentralized verification and cross-chain functionality. Try extending it with governance or staking features, or explore more KRNL kernels.
+You've built a secure, KRNL-powered token vesting platform! This project showcases decentralized verification and cross-chain functionality. Try extending it with governance or staking features, or explore more KRNL kernels.
 
 **Resources**:
 - [KRNL Documentation](https://docs.krnl.xyz)
