@@ -13,7 +13,7 @@ import { useTokenContext } from '@/contexts/token-context'
 import { useToken } from '@/hooks/useToken'
 import { useVesting } from '@/hooks/useVesting'
 import { formatEther } from 'viem'
-import { formatAddress, formatDate } from '@/lib/utils'
+import { formatDate } from '@/lib/utils'
 
 interface AdminCardProps {
   title: string
