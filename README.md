@@ -295,23 +295,31 @@ await contract.claimTokens(krnlPayload, token, amount)
 
 ## 🎯 Demo Platform Features
 
-### User Experience
-- **Token Selection**: Choose any ERC20 token for vesting
-- **Eligibility Check**: Real-time KRNL verification of vesting eligibility  
-- **Progress Tracking**: Live vesting progress with kernel-calculated amounts
-- **Secure Claims**: All claims verified through KRNL kernels
+### Token Claims
+- **Cross-Chain Verification**: Claims verified through KRNL kernels on Base Sepolia
+- **Real-Time Eligibility**: Instant kernel-based eligibility verification
+- **Secure Process**: Multi-step KRNL verification before token transfer
+- **User Experience**: Prominent interface highlighting KRNL integration
+- **Chain Switching**: Automatic network switching with user-friendly prompts
 
-### Admin Features
-- **Schedule Creation**: Create vesting schedules on Base Sepolia
+### Token Management
+- **Deposit Operations**: Deposit tokens to make them available for claims (Sepolia)
+- **Withdraw Operations**: Remove deposited tokens from the claim pool (Sepolia)
+- **Balance Tracking**: Real-time tracking of deposits and claims
+
+### Admin Features (Base Sepolia)
+- **Schedule Creation**: Create vesting schedules on Base Sepolia using KRNL kernels
 - **Template System**: Quick templates for common vesting patterns
-- **Real-time Monitoring**: Live schedule tracking across chains
+- **Chain Switching**: Automatic prompts to switch to Base Sepolia for admin operations
 - **Multi-token Support**: Manage schedules for any ERC20 token
+- **Real-time Monitoring**: Live schedule tracking across chains
 
 ### KRNL Integration Showcase
-- **Cross-Chain Verification**: Demonstrate KRNL's cross-chain capabilities
-- **Secure Architecture**: Show proper KRNL integration patterns
+- **Kernel-Verified Claims**: Primary feature showcasing KRNL's cross-chain capabilities
+- **Secure Architecture**: Proper KRNL integration patterns and best practices
 - **Error Handling**: Comprehensive kernel error handling examples
 - **Performance**: Efficient kernel execution and response processing
+- **Network Management**: Smart chain switching for optimal user experience
 
 ## 🔧 Development
 
@@ -345,6 +353,11 @@ npm run test:frontend            # Run frontend tests
 ├── src/frontend/               # React + KRNL SDK
 │   ├── src/hooks/             # KRNL integration hooks
 │   ├── src/components/        # UI components
+│   │   ├── user/             # User components
+│   │   │   ├── token-claim.tsx    # KRNL claim feature (main)
+│   │   │   ├── token-operations.tsx # Deposit/withdraw
+│   │   │   └── token-info.tsx     # Vesting information
+│   │   └── admin/            # Admin components
 │   └── src/config/           # KRNL and network config
 ├── scripts/                   # Deployment scripts
 └── docs/                     # Documentation
@@ -354,13 +367,13 @@ npm run test:frontend            # Run frontend tests
 
 ### For KRNL Developers
 - **Real Implementation**: Production-ready KRNL integration patterns
-- **Cross-Chain Example**: Practical multi-network KRNL usage
+- **Cross-Chain Example**: Practical multi-network KRNL usage with automatic chain switching
 - **Best Practices**: Security patterns and error handling
 - **Complete Stack**: Full-stack KRNL application example
 
 ### For dApp Builders  
 - **KRNL SDK Integration**: Frontend integration with KRNL kernels
-- **Multi-Chain UI**: User experience across multiple networks
+- **Multi-Chain UI**: User experience across multiple networks with seamless switching
 - **Error Handling**: Comprehensive error management patterns
 - **Modern Stack**: React + TypeScript + Tailwind + KRNL
 
@@ -389,4 +402,4 @@ npm run test:frontend            # Run frontend tests
 
 **Built with ❤️ by [Jovells](https://linktr.ee/jovells) • Powered by [KRNL](https://krnl.xyz)**
 
-> 🎓 **Educational Note**: This platform demonstrates KRNL integration patterns for developers. Use it to learn kernel implementation, cross-chain verification, and secure dApp architecture with KRNL technology. 
+> 🎓 **Educational Note**: This platform demonstrates KRNL integration patterns for developers. Use it to learn kernel implementation, cross-chain verification, and secure dApp architecture with KRNL technology.

@@ -4,9 +4,10 @@ import { Calendar, Clock, Users, AlertTriangle, Loader2, CheckCircle } from 'luc
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { useVesting } from '@/hooks/useVesting'
 import { useContractOperations } from '@/hooks/useContractOperations'
+import { useSwitchChain } from 'wagmi'
+import { baseSepolia } from 'viem/chains'
 
 const SCHEDULE_TEMPLATES = [
   {
@@ -52,6 +53,7 @@ export function ScheduleForm() {
   })
 
   const { isBaseSepolia } = useVesting('')
+  const { switchChain } = useSwitchChain()
   const { 
     createVestingSchedule, 
     isSettingSchedule, 
@@ -61,6 +63,14 @@ export function ScheduleForm() {
 
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null)
   const [showSuccess, setShowSuccess] = useState(false)
+
+  const handleSwitchToBaseSepolia = async () => {
+    try {
+      await switchChain({ chainId: baseSepolia.id })
+    } catch (error) {
+      console.error('Failed to switch to Base Sepolia:', error)
+    }
+  }
 
   const handleTemplateSelect = (template: typeof SCHEDULE_TEMPLATES[0]) => {
     setAdminForm(prev => ({
@@ -106,10 +116,15 @@ export function ScheduleForm() {
             <span>Create Vesting Schedule</span>
           </div>
           {!isBaseSepolia && (
-            <Badge variant="destructive" className="animate-pulse">
+            <Button 
+              variant="destructive" 
+              size="sm"
+              onClick={handleSwitchToBaseSepolia}
+              className="animate-pulse"
+            >
               <AlertTriangle className="mr-1 h-3 w-3" />
               Switch to Base Sepolia
-            </Badge>
+            </Button>
           )}
         </CardTitle>
       </CardHeader>
@@ -121,11 +136,21 @@ export function ScheduleForm() {
             animate={{ opacity: 1, y: 0 }}
             className="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg"
           >
-            <div className="flex items-center space-x-2 text-amber-800 dark:text-amber-200">
-              <AlertTriangle className="h-4 w-4" />
-              <span className="text-sm font-medium">
-                Please switch to Base Sepolia network to create vesting schedules
-              </span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2 text-amber-800 dark:text-amber-200">
+                <AlertTriangle className="h-4 w-4" />
+                <span className="text-sm font-medium">
+                  Please switch to Base Sepolia network to create vesting schedules
+                </span>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleSwitchToBaseSepolia}
+                className="text-amber-800 border-amber-300 hover:bg-amber-100"
+              >
+                Switch Network
+              </Button>
             </div>
           </motion.div>
         )}

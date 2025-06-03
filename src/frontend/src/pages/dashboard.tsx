@@ -1,8 +1,9 @@
 import { motion } from 'framer-motion'
-import { Coins, Target } from 'lucide-react'
+import { Coins, Target, Zap, Wallet } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { TokenInfo } from '@/components/user/token-info'
-import { TokenActions } from '@/components/user/token-actions'
+import { TokenClaim } from '@/components/user/token-claim'
+import { TokenOperations } from '@/components/user/token-operations'
 import { TokenSelector } from '@/components/token-selector'
 import { useTokenContext } from '@/contexts/token-context'
 
@@ -88,48 +89,81 @@ export function Dashboard() {
           transition={{ delay: 0.2 }}
           className="space-y-8"
         >
-          {/* Main Content Grid - Token Actions First (More Prominent) */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Token Actions - First and Prominent */}
-            <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-              className="lg:col-span-1 order-1 lg:order-1"
-            >
-              <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm rounded-2xl overflow-hidden h-fit">
-                <CardHeader className="bg-gradient-to-r from-[#001efe]/10 to-blue-50 dark:from-[#001efe]/20 dark:to-blue-900/30 border-b border-gray-100 dark:border-gray-700">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-[#001efe] rounded-xl flex items-center justify-center">
-                      <Coins className="h-5 w-5 text-white" />
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Left Column: Token Claims + Token Operations */}
+            <div className="space-y-8">
+              {/* KRNL Claim Feature - Prominent but not full width */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="relative"
+              >
+                {/* Highlight glow effect */}
+                <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-blue-500/20 rounded-2xl blur opacity-75"></div>
+                
+                <Card className="relative bg-white dark:bg-gray-800 border-2 border-primary/20 shadow-lg rounded-2xl overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-[#001efe]/10 to-blue-50 dark:from-[#001efe]/20 dark:to-blue-900/30 border-b border-gray-100 dark:border-gray-700">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-12 h-12 bg-[#001efe] rounded-xl flex items-center justify-center">
+                        <Zap className="h-6 w-6 text-white" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-2xl text-gray-900 dark:text-white flex items-center space-x-2">
+                          <span>Token Claims</span>
+                        </CardTitle>
+                        <CardDescription className="text-gray-600 dark:text-gray-400 text-base">
+                          Experience secure, cross-chain token claiming powered by KRNL kernels
+                        </CardDescription>
+                      </div>
                     </div>
-                    <div>
-                      <CardTitle className="text-xl text-gray-900 dark:text-white">
-                        KRNL-Powered Actions
-                      </CardTitle>
-                      <CardDescription className="text-gray-600 dark:text-gray-400">
-                        Experience kernel-verified operations
-                      </CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-6">
-                  <TokenActions />
-                </CardContent>
-              </Card>
-            </motion.div>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    <TokenClaim />
+                  </CardContent>
+                </Card>
+              </motion.div>
 
-            {/* Token Information - Secondary */}
+              {/* Token Operations - Below Claims */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.4 }}
+              >
+                <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm rounded-2xl overflow-hidden">
+                  <CardHeader className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-700 dark:to-gray-800 border-b border-gray-100 dark:border-gray-700">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-gray-500 to-gray-600 rounded-xl flex items-center justify-center">
+                        <Wallet className="h-5 w-5 text-white" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-xl text-gray-900 dark:text-white">
+                          Token Management
+                        </CardTitle>
+                        <CardDescription className="text-gray-600 dark:text-gray-400">
+                          Deposit and withdraw tokens for the claim pool
+                        </CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    <TokenOperations />
+                  </CardContent>
+                </Card>
+              </motion.div>
+            </div>
+
+            {/* Right Column: Token Information */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.4 }}
-              className="lg:col-span-2 order-2 lg:order-2"
+              transition={{ delay: 0.5 }}
             >
-              <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm rounded-2xl overflow-hidden">
-                <CardHeader className="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-700 dark:to-gray-800 border-b border-gray-100 dark:border-gray-700">
+              <Card className="bg-white dark:bg-gray-800 border-0 shadow-sm rounded-2xl overflow-hidden h-fit">
+                <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 border-b border-gray-100 dark:border-gray-700">
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-gray-500 to-gray-600 rounded-xl flex items-center justify-center">
+                    <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
                       <Coins className="h-5 w-5 text-white" />
                     </div>
                     <div>

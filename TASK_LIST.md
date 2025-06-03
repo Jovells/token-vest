@@ -111,6 +111,11 @@ Transitioning from a **Transaction Limit Kernel** (daily donation limits) to a c
 - [✅] **Create**: TokenSelector.tsx integrated in App.tsx for ERC20 token selection *(Completed: Dec 2024)*
 - [✅] **Create**: DepositInterface.tsx integrated in App.tsx for token deposits *(Completed: Dec 2024)*
 - [✅] **Create**: ScheduleForm.tsx integrated in App.tsx for creating/editing schedules *(Completed: Dec 2024)*
+  - **Base Sepolia Integration**: TokenVestingKernel functions for schedule creation
+  - **Templates System**: Quick templates for common vesting scenarios (4yr employee, 2yr advisor, etc.)
+  - **Form Validation**: Real-time validation with user-friendly error messages
+  - **Modular Architecture**: Clean separation between admin page layout and form functionality
+  - **Chain Switching**: Automatic Base Sepolia network switching with user-friendly prompts
 - [✅] **Create**: EligibleAddressList.tsx integrated in App.tsx for managing eligible addresses *(Completed: Dec 2024)*
 - [✅] **Update**: Navigation for user/admin views *(Completed: Dec 2024)*
 - [✅] **Remove**: Faucet component (replaced with VestedToken minting) *(Completed: Dec 2024)*

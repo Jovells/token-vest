@@ -255,12 +255,22 @@ export function Dashboard() {
       
       {/* Conditional Content Based on Token Selection */}
       {selectedToken ? (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Token Actions - Primary */}
-          <TokenActionsCard />
+        <div className="space-y-8">
+          {/* Token Claims - Main Feature (Most Prominent) */}
+          <TokenClaimCard 
+            title="Token Claims"
+            description="Experience secure, cross-chain token claiming powered by KRNL kernels"
+            featured={true}
+          />
           
-          {/* Token Information - Secondary */}
-          <TokenInformationCard />
+          {/* Secondary Features Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Token Operations - Deposit/Withdraw */}
+            <TokenOperationsCard />
+            
+            {/* Token Information - Vesting Details */}
+            <TokenInformationCard />
+          </div>
         </div>
       ) : (
         <NoTokenSelectedState />
@@ -270,34 +280,39 @@ export function Dashboard() {
 }
 ```
 
-##### Admin Interface (Enhanced)
+##### Admin Interface (Modular Architecture)
 ```typescript
-// Enhanced admin panel with real-time schedule data
+// Clean, modular admin implementation using dedicated components
 export function Admin() {
+  const { selectedToken } = useTokenContext()
+  const { getTokenSymbol } = useToken()
   const { vestingSchedule, scheduleExists, isCreatedByUser, getVestingProgress } = useVesting(selectedToken || '')
-  const [showTemplates, setShowTemplates] = useState(false)
 
   return (
     <div className="space-y-8">
       {/* Token Selector Card */}
-      <TokenSelectorCard />
+      <TokenSelectorCard 
+        title="Token Selection"
+        description="Choose a token to create KRNL-powered vesting schedules"
+      />
       
       {selectedToken && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Create Schedule with Integrated Templates */}
-          <CreateScheduleCard>
-            {/* Minimized Templates Section */}
-            <CollapsibleTemplatesSection 
-              showTemplates={showTemplates}
-              onToggle={setShowTemplates}
-            />
-            
-            {/* Schedule Creation Form */}
+          {/* Modular Schedule Creation */}
+          <AdminCard
+            title="Create Vesting Schedule"
+            description="Set up a new token vesting schedule on Base Sepolia"
+            icon={<Calendar className="h-5 w-5 text-white" />}
+          >
             <ScheduleForm />
-          </CreateScheduleCard>
+          </AdminCard>
           
           {/* Real-time Schedule Information */}
-          <ScheduleInformationCard>
+          <AdminCard
+            title="Schedule Information"
+            description="View current vesting schedule details"
+            icon={<Settings className="h-5 w-5 text-white" />}
+          >
             {scheduleExists ? (
               <ActiveScheduleDisplay 
                 schedule={vestingSchedule}
@@ -307,7 +322,7 @@ export function Admin() {
             ) : (
               <NoScheduleDisplay />
             )}
-          </ScheduleInformationCard>
+          </AdminCard>
         </div>
       )}
     </div>
@@ -315,75 +330,148 @@ export function Admin() {
 }
 ```
 
-#### UI Design Principles
-
-##### Token Selection Flow
+##### Modular ScheduleForm Component
 ```typescript
-// Contextual token selection pattern
-const TokenSelectorCard = ({ title, description }) => (
-  <Card className="dedicated-token-selection">
-    <CardHeader>
-      <TargetIcon />
-      <Title>{title}</Title>
-      <Description>{description}</Description>
-    </CardHeader>
-    <CardContent>
-      <TokenSelector />
-    </CardContent>
-  </Card>
-)
+// Dedicated schedule form component with full chain switching functionality
+export function ScheduleForm() {
+  const { isBaseSepolia } = useVesting('')
+  const { switchChain } = useSwitchChain()
+  const { createVestingSchedule, isSettingSchedule, error, setError } = useContractOperations()
 
-// Integration in pages
-// Dashboard: "Choose a token to view vesting details and manage claims"
-// Admin: "Choose a token to create and manage vesting schedules"
-```
+  const handleSwitchToBaseSepolia = async () => {
+    try {
+      await switchChain({ chainId: baseSepolia.id })
+    } catch (error) {
+      console.error('Failed to switch to Base Sepolia:', error)
+    }
+  }
 
-##### Real-time Data Display
-```typescript
-// Enhanced schedule information with live data
-const ScheduleInformationDisplay = () => {
-  const { vestingSchedule, scheduleExists, getVestingProgress } = useVesting(selectedToken)
-  
   return (
-    <div>
-      {scheduleExists ? (
-        <ActiveScheduleView>
-          <ScheduleStatus createdByUser={isCreatedByUser} />
-          <ProgressMetrics progress={getVestingProgress()} />
-          <ScheduleParameters schedule={vestingSchedule} />
-        </ActiveScheduleView>
-      ) : (
-        <EmptyScheduleView />
+    <div className="space-y-6">
+      {/* Network Warning with Chain Switching */}
+      {!isBaseSepolia && (
+        <motion.div className="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2 text-amber-800 dark:text-amber-200">
+              <AlertTriangle className="h-4 w-4" />
+              <span className="text-sm font-medium">
+                Please switch to Base Sepolia network to create vesting schedules
+              </span>
+            </div>
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleSwitchToBaseSepolia}
+              className="text-amber-800 border-amber-300 hover:bg-amber-100"
+            >
+              Switch Network
+            </Button>
+          </div>
+        </motion.div>
       )}
+
+      {/* Integrated Templates */}
+      <TemplateSelection onTemplateSelect={handleTemplateSelect} />
+      
+      {/* Form Implementation */}
+      <VestingScheduleForm 
+        onSubmit={handleSubmit}
+        isBaseSepolia={isBaseSepolia}
+      />
     </div>
   )
 }
 ```
 
-##### Minimized Template Integration
+#### UI Design Principles
+
+##### Modular Component Architecture
 ```typescript
-// Streamlined template section
-const CollapsibleTemplatesSection = ({ showTemplates, onToggle }) => (
-  <div className="border rounded-xl">
-    <ToggleButton onClick={onToggle}>
-      <CalendarIcon />
-      <span>Quick Templates</span>
-      {showTemplates ? <ChevronUp /> : <ChevronDown />}
-    </ToggleButton>
+// Clean separation of concerns in admin interface
+const AdminInterface = () => (
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <AdminCard title="Create Vesting Schedule">
+      <ScheduleForm />  {/* Encapsulates all form logic and chain switching */}
+    </AdminCard>
     
-    <AnimatePresence>
-      {showTemplates && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          exit={{ opacity: 0, height: 0 }}
-        >
-          <CompactTemplateGrid />
-        </motion.div>
-      )}
-    </AnimatePresence>
+    <AdminCard title="Schedule Information">
+      <ScheduleInfo />  {/* Focused on display and real-time data */}
+    </AdminCard>
   </div>
 )
+
+// Dedicated ScheduleForm with integrated functionality
+const ScheduleForm = () => (
+  <div>
+    <NetworkWarning />     {/* Base Sepolia chain switching */}
+    <TemplateSection />    {/* Quick template selection */}
+    <FormFields />         {/* Schedule parameters */}
+    <SubmitButton />       {/* Transaction handling */}
+  </div>
+)
+
+##### Chain Switching Implementation
+```typescript
+// Consistent chain switching pattern across components
+const useChainSwitching = (targetChain: Chain) => {
+  const { switchChain } = useSwitchChain()
+  
+  const handleSwitch = async () => {
+    try {
+      await switchChain({ chainId: targetChain.id })
+    } catch (error) {
+      console.error(`Failed to switch to ${targetChain.name}:`, error)
+      toast.error(`Failed to switch to ${targetChain.name} network`)
+    }
+  }
+  
+  return { handleSwitch }
+}
+
+// Network warning component pattern
+const NetworkWarning = ({ targetChain, currentChain, onSwitch }) => (
+  !isCorrectChain && (
+    <motion.div className="p-4 bg-amber-50 rounded-lg">
+      <div className="flex items-center justify-between">
+        <span>Switch to {targetChain.name} network</span>
+        <Button onClick={onSwitch}>Switch Network</Button>
+      </div>
+    </motion.div>
+  )
+)
+```
+
+##### Component Responsibilities
+```typescript
+// Admin Page: Layout and orchestration only
+export function Admin() {
+  return (
+    <div className="space-y-8">
+      <TokenSelector />           {/* Token selection */}
+      <AdminGrid>                 {/* Layout management */}
+        <ScheduleForm />          {/* Self-contained form */}
+        <ScheduleInfo />          {/* Self-contained display */}
+      </AdminGrid>
+    </div>
+  )
+}
+
+// ScheduleForm: Complete form functionality
+export function ScheduleForm() {
+  // All form state and logic encapsulated here
+  const [form, setForm] = useState(...)
+  const { isBaseSepolia } = useVesting('')
+  const { switchChain } = useSwitchChain()
+  
+  return (
+    <div className="space-y-6">
+      <NetworkGuard targetChain={baseSepolia} />
+      <Templates onSelect={handleTemplateSelect} />
+      <FormFields form={form} setForm={setForm} />
+      <SubmitButton onSubmit={handleSubmit} />
+    </div>
+  )
+}
 ```
 
 #### State Management Patterns
@@ -439,16 +527,18 @@ export function useVesting(selectedToken: string) {
 
 ##### Enhanced Information Architecture
 ```typescript
-// Clear information hierarchy
+// Clear information hierarchy with KRNL focus
 Interface Hierarchy:
 ├── Token Selection (Primary Action)
 ├── Main Content (Conditional on Token Selection)
 │   ├── Dashboard
-│   │   ├── Token Actions (Primary)
-│   │   └── Token Information (Secondary)
+│   │   ├── Token Claims (Primary Feature - Most Prominent)
+│   │   └── Secondary Features Grid
+│   │       ├── Token Operations (Deposit/Withdraw)
+│   │       └── Token Information (Vesting Details)
 │   └── Admin
-│       ├── Create Schedule (with minimized templates)
-│       └── Real-time Schedule Information
+│       ├── Schedule Creation (Base Sepolia)
+│       └── Schedule Information (Real-time Data)
 ```
 
 #### Performance Optimizations

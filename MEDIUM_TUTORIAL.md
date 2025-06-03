@@ -966,6 +966,314 @@ VITE_TOKEN_CLAIM_CONTRACT_ADDRESS=0x...
 VITE_TOKEN_VESTING_KERNEL_ADDRESS=0x...
 ```
 
+### 4. Component Architecture & Chain Switching
+
+The platform uses a **modular component architecture** that separates concerns and makes chain switching seamless across different network requirements.
+
+#### Architecture Benefits
+
+**Modular Design:**
+- **ScheduleForm Component**: Encapsulates all Base Sepolia logic, chain switching, templates, and form handling
+- **Admin Page**: Clean layout and orchestration without complex state management  
+- **Separation of Concerns**: Each component has a single, focused responsibility
+- **Reusability**: Components can be easily reused across different pages
+
+**Chain Switching Integration:**
+- **Base Sepolia**: Admin operations (vesting schedule creation) via `ScheduleForm`
+- **Sepolia**: User operations (token claims, deposits, withdrawals) via dedicated components
+- **Automatic Prompts**: Users guided to switch networks when needed
+- **Consistent UX**: Same switching pattern across all components
+
+#### Component Structure
+
+```
+src/frontend/src/components/
+├── admin/
+│   └── schedule-form.tsx     # Complete Base Sepolia integration
+├── user/
+│   ├── token-claim.tsx       # Sepolia claims with KRNL verification  
+│   ├── token-operations.tsx  # Sepolia deposits/withdrawals
+│   └── token-info.tsx        # Vesting information display
+└── token-selector.tsx        # Multi-token selection
+```
+
+#### KRNL Claim Component (Main Feature)
+
+Create `src/frontend/src/components/user/token-claim.tsx`:
+
+```typescript
+import { useState } from 'react'
+import { motion } from 'framer-motion'
+import { Coins, Loader2, Zap, Shield, ChevronRight } from 'lucide-react'
+import { useSwitchChain } from 'wagmi'
+import { sepolia } from 'viem/chains'
+
+export function TokenClaim() {
+  const [claimAmount, setClaimAmount] = useState('')
+  const { switchChain } = useSwitchChain()
+  
+  const { selectedToken } = useTokenContext()
+  const { isEligible, vestedAmount } = useVesting(selectedToken)
+  const { isSepolia, userClaims } = useTokenData(selectedToken)
+  const { claimTokens, isExecutingKernel, isClaiming } = useContractOperations()
+
+  const handleSwitchToSepolia = async () => {
+    try {
+      await switchChain({ chainId: sepolia.id })
+    } catch (error) {
+      console.error('Failed to switch to Sepolia:', error)
+    }
+  }
+
+  return (
+    <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-primary/10">
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+              <Coins className="h-4 w-4 text-primary-foreground" />
+            </div>
+            <div>
+              <span className="text-lg">Claim Vested Tokens</span>
+              <div className="flex items-center space-x-2 mt-1">
+                <Badge variant="secondary" className="text-xs">
+                  <Zap className="h-3 w-3 mr-1" />
+                  KRNL Powered
+                </Badge>
+                <Badge variant="outline" className="text-xs">
+                  <Shield className="h-3 w-3 mr-1" />
+                  Cross-Chain Verified
+                </Badge>
+              </div>
+            </div>
+          </div>
+          {!isSepolia && (
+            <Button 
+              variant="destructive" 
+              size="sm"
+              onClick={handleSwitchToSepolia}
+              className="animate-pulse"
+            >
+              Switch to Sepolia
+            </Button>
+          )}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* KRNL Feature Highlight */}
+        <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
+          <div className="flex items-center space-x-2 mb-2">
+            <Zap className="h-4 w-4 text-primary" />
+            <span className="text-sm font-semibold text-primary">KRNL Integration Showcase</span>
+          </div>
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            Token claims are verified through KRNL kernels deployed on Base Sepolia. 
+            This demonstrates secure cross-chain verification where vesting schedules on Base Sepolia 
+            control token claims on Sepolia through KRNL's kernel architecture.
+          </p>
+        </div>
+
+        {/* Network Warning with Chain Switching */}
+        {!isSepolia && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2 text-amber-800 dark:text-amber-200">
+                <Coins className="h-4 w-4" />
+                <span className="text-sm font-medium">
+                  Switch to Sepolia network to claim tokens
+                </span>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleSwitchToSepolia}
+                className="text-amber-800 border-amber-300 hover:bg-amber-100"
+              >
+                Switch Network
+              </Button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Claim Form with KRNL Process Info */}
+        <div className="space-y-4">
+          {/* Claim input and buttons */}
+          <Button
+            onClick={handleClaim}
+            disabled={!claimAmount || isLoading || !isEligible || !isSepolia}
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground h-12 text-base font-semibold"
+            size="lg"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {isExecutingKernel ? 'Verifying with KRNL Kernel...' : 'Processing Claim...'}
+              </>
+            ) : (
+              <>
+                <Coins className="mr-2 h-5 w-5" />
+                Claim Tokens via KRNL
+                <ChevronRight className="ml-2 h-4 w-4" />
+              </>
+            )}
+          </Button>
+          
+          {/* KRNL Process Information */}
+          <div className="text-xs text-muted-foreground bg-muted/30 p-3 rounded-lg">
+            <div className="font-medium mb-2">KRNL Claim Process:</div>
+            <div className="space-y-1">
+              <div className="flex items-center space-x-2">
+                <div className="w-1 h-1 bg-primary rounded-full"></div>
+                <span>1. Verify eligibility through Base Sepolia kernel</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-1 h-1 bg-primary rounded-full"></div>
+                <span>2. Cross-chain verification via KRNL protocol</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <div className="w-1 h-1 bg-primary rounded-full"></div>
+                <span>3. Execute token transfer on Sepolia</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+```
+
+#### Admin Chain Switching
+
+Update `src/frontend/src/components/admin/schedule-form.tsx` with Base Sepolia switching:
+
+```typescript
+import { useSwitchChain } from 'wagmi'
+import { baseSepolia } from 'viem/chains'
+
+export function ScheduleForm() {
+  const { isBaseSepolia } = useVesting('')
+  const { switchChain } = useSwitchChain()
+
+  const handleSwitchToBaseSepolia = async () => {
+    try {
+      await switchChain({ chainId: baseSepolia.id })
+    } catch (error) {
+      console.error('Failed to switch to Base Sepolia:', error)
+    }
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <Calendar className="h-5 w-5 text-primary" />
+            <span>Create Vesting Schedule</span>
+          </div>
+          {!isBaseSepolia && (
+            <Button 
+              variant="destructive" 
+              size="sm"
+              onClick={handleSwitchToBaseSepolia}
+              className="animate-pulse"
+            >
+              <AlertTriangle className="mr-1 h-3 w-3" />
+              Switch to Base Sepolia
+            </Button>
+          )}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        {/* Network Warning with Switch Button */}
+        {!isBaseSepolia && (
+          <motion.div className="mb-4 p-4 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2 text-amber-800 dark:text-amber-200">
+                <AlertTriangle className="h-4 w-4" />
+                <span className="text-sm font-medium">
+                  Please switch to Base Sepolia network to create vesting schedules
+                </span>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={handleSwitchToBaseSepolia}
+                className="text-amber-800 border-amber-300 hover:bg-amber-100"
+              >
+                Switch Network
+              </Button>
+            </div>
+          </motion.div>
+        )}
+        
+        {/* Rest of form */}
+      </CardContent>
+    </Card>
+  )
+}
+```
+
+#### Modular Admin Page Implementation
+
+Update `src/frontend/src/pages/admin.tsx` to use the modular approach:
+
+```typescript
+import { motion } from 'framer-motion'
+import { Settings, Target, Calendar, CheckCircle, XCircle } from 'lucide-react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { TokenSelector } from '@/components/token-selector'
+import { ScheduleForm } from '@/components/admin/schedule-form'
+import { useTokenContext } from '@/contexts/token-context'
+import { useToken } from '@/hooks/useToken'
+import { useVesting } from '@/hooks/useVesting'
+import { formatEther } from 'viem'
+import { formatDate } from '@/lib/utils'
+
+export function Admin() {
+  const { selectedToken } = useTokenContext()
+  const { getTokenSymbol } = useToken()
+  const { vestingSchedule, scheduleExists, isCreatedByUser, getVestingProgress } = useVesting(selectedToken || '')
+
+  return (
+    <div className="space-y-8">
+      {/* Token Selector */}
+      <TokenSelectorCard />
+
+      {selectedToken && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Modular Schedule Creation */}
+          <AdminCard
+            title="Create Vesting Schedule"
+            description="Set up a new token vesting schedule on Base Sepolia"
+            icon={<Calendar className="h-5 w-5 text-white" />}
+          >
+            <ScheduleForm />
+          </AdminCard>
+          
+          {/* Schedule Information Display */}
+          <AdminCard
+            title="Schedule Information"
+            description="View current vesting schedule details"
+            icon={<Settings className="h-5 w-5 text-white" />}
+          >
+            {scheduleExists ? (
+              <ActiveScheduleDisplay />
+            ) : (
+              <NoScheduleDisplay />
+            )}
+          </AdminCard>
+        </div>
+      )}
+    </div>
+  )
+}
+```
+
 ## Part 6: KRNL Platform Integration
 
 ### 1. Register Your Kernel

@@ -46,5 +46,4 @@ src/frontend/abis/
 *.generated.ts
 *.generated.tsx 
 
-.cursorrules
 .vercel

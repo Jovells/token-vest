@@ -41,7 +41,7 @@ export function Layout({ children, currentView, onViewChange }: LayoutProps) {
       name: 'Dashboard',
       icon: BarChart3,
       key: 'dashboard' as const,
-      description: 'Demo KRNL token vesting & claims'
+      description: 'Demo token vesting & claims'
     },
     {
       name: 'Admin Panel',
