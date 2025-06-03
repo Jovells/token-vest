@@ -1,405 +1,310 @@
-# TokenVest - KRNL Demo Platform
+# A Human-Friendly Guide to Building a KRNL-Powered Token Vesting Platform
 
-A comprehensive **KRNL integration demonstration** showcasing real-world kernel implementation for token vesting and claiming. This platform demonstrates how to build secure, cross-chain token distribution systems using KRNL's powerful kernel architecture.
+## Introduction
 
-> **🎯 Educational Purpose**: This platform serves as a practical example for developers learning KRNL integration patterns.
+Ready to dive into decentralized finance with a twist? In this tutorial, we’ll build a **token vesting platform** powered by **KRNL**, a cutting-edge platform that makes cross-chain verification secure and seamless. By the end, you’ll have a production-ready app that manages token vesting schedules on Base Sepolia and processes claims on Sepolia, all tied together with a modern React frontend.
 
-## 🌐 Live Demo
+Whether you’re new to blockchain or a seasoned developer, we’ve got you covered with clear explanations, practical tips, and solutions to common pitfalls. Let’s get started!
 
-**✨ Try the live demo: [https://token-vest-tau.vercel.app](https://token-vest-tau.vercel.app)**
+## Why KRNL?
 
-Experience the full KRNL integration in action:
-- Create token vesting schedules on Base Sepolia
-- Claim tokens on Sepolia with cross-chain verification
-- See real-time KRNL kernel execution
-- Test with demo tokens or your own ERC20s
+KRNL is like a universal translator for blockchains. It allows smart contracts on one chain (like Base Sepolia) to verify data on another (like Sepolia) without manual intervention. This is done through **kernels**—specialized smart contracts that handle verification tasks. For our platform:
+- **Decentralized Verification**: No central authority needed.
+- **Cross-Chain Security**: Secure operations across networks.
+- **Transparent Logic**: All verification is on-chain and auditable.
+- **Flexibility**: Separates verification from execution for better security.
 
-> **Note**: You'll need MetaMask configured for both Sepolia and Base Sepolia testnet networks.
+## What We’re Building
 
-## 🚀 What is KRNL?
+We’re creating a token vesting platform where:
+- **Admins** set vesting schedules on Base Sepolia using `TokenVestingKernel`.
+- **Users** claim tokens on Sepolia via `TokenClaimContract`, with KRNL verifying eligibility.
+- A **React frontend** makes it easy to interact with the contracts.
+- KRNL ensures secure cross-chain communication.
 
-**KRNL** is a kernel operating system that enables secure, verifiable computation across blockchains. This demo platform showcases:
+Here’s the architecture in simple terms:
 
-- **On-Chain Kernels**: TokenVestingKernel deployed on Base Sepolia for vesting logic
-- **Cross-Chain Verification**: Secure claim verification across Sepolia and Base Sepolia
-- **Real-World Implementation**: Production-ready KRNL integration patterns
-- **Developer Education**: Clear examples of KRNL best practices
+| Component            | Network       | Role                                      |
+|----------------------|---------------|-------------------------------------------|
+| TokenVestingKernel   | Base Sepolia  | Manages vesting schedules                |
+| TokenClaimContract   | Sepolia       | Handles token claims with KRNL verification |
+| React Frontend        | Sepolia       | User interface for claims and deposits    |
+| KRNL Platform        | Cross-Chain   | Verifies data across networks             |
 
-## ✨ KRNL Integration Highlights
+## Prerequisites
 
-### Core KRNL Implementation
+You’ll need:
+- Basic knowledge of **Solidity**, **React**, and blockchain concepts.
+- **Node.js 18+** and npm.
+- **MetaMask** configured for Sepolia and Base Sepolia testnets.
+- A **KRNL Platform account** ([KRNL Platform](https://app.platform.krnl.xyz)).
+- Test ETH for both testnets (get some from testnet faucets).
+- API keys for Infura/Alchemy, Etherscan, and BaseScan.
+
+**Pro Tip**: Secure your `.env` file, as it contains sensitive data like private keys.
+
+## Part 1: Project Setup
+
+Let’s set up the project structure and environment.
+
+1. **Initialize the Project**:
+   ```bash
+   mkdir krnl-vesting-platform
+   cd krnl-vesting-platform
+   npm init -y
+   npm install --save-dev hardhat @nomicfoundation/hardhat-toolbox
+   npm install @openzeppelin/contracts @oasisprotocol/sapphire-contracts
+   npx hardhat init
+   ```
+
+2. **Configure Hardhat**:
+   Create `hardhat.config.js` to support Sepolia and Base Sepolia:
+
+   ```javascript
+   require("@nomicfoundation/hardhat-toolbox");
+   require("dotenv").config();
+
+   module.exports = {
+     solidity: "0.8.20",
+     networks: {
+       sepolia: {
+         url: process.env.SEPOLIA_RPC_URL,
+         accounts: [process.env.PRIVATE_KEY],
+         chainId: 11155111
+       },
+       baseSepolia: {
+         url: process.env.BASE_SEPOLIA_RPC_URL || "https://sepolia.base.org",
+         accounts: [process.env.PRIVATE_KEY],
+         chainId: 84532
+       }
+     },
+     etherscan: {
+       apiKey: {
+         sepolia: process.env.ETHERSCAN_API_KEY,
+         baseSepolia: process.env.BASESCAN_API_KEY
+       }
+     }
+   };
+   ```
+
+3. **Set Up Environment**:
+   Create `.env` with your configuration:
+
+   ```bash
+   PRIVATE_KEY=your_private_key_here
+   SEPOLIA_RPC_URL=https://sepolia.infura.io/v3/YOUR_PROJECT_ID
+   BASE_SEPOLIA_RPC_URL=https://sepolia.base.org
+   ETHERSCAN_API_KEY=your_etherscan_api_key
+   BASESCAN_API_KEY=your_basescan_api_key
+   TOKEN_AUTHORITY_PUBLIC_KEY=your_token_authority_public_key
+   VESTING_KERNEL_ID=1
+   ```
+
+**Common Pitfall**: Ensure your private key and API keys are correct. A wrong key can cause deployment failures.
+
+## Part 2: Smart Contract Development
+
+Let’s build the core smart contracts. We’ll focus on the key functions for KRNL integration.
+
+### 2.1 TokenVestingKernel.sol (Base Sepolia)
+
+This contract manages vesting schedules, acting like a schedule keeper for token releases.
+
+**Key Function: `getVestedAmount`**
+
 ```solidity
-contract TokenClaimContract is KRNL {
-    // CORRECT: KrnlPayload parameter comes first
-    function claimTokens(
-        KrnlPayload memory krnlPayload,
-        address token,
-        uint256 amount
-    ) external onlyAuthorized(krnlPayload, abi.encode(token, amount)) {
-        // Decode kernel responses
-        KernelResponse[] memory responses = abi.decode(
-            krnlPayload.kernelResponses, (KernelResponse[])
-        );
-        
-        // Find vesting kernel response and verify eligibility
-        for (uint i = 0; i < responses.length; i++) {
-            if (responses[i].kernelId == VESTING_KERNEL_ID) {
-                // Check for errors first
-                if (bytes(responses[i].err).length > 0) {
-                    revert("Kernel verification failed");
-                }
-                
-                // Decode vested amount
-                uint256 vestedAmount = abi.decode(responses[i].result, (uint256));
-                // Process claim with kernel-verified amount
+function getVestedAmount(address token, address user) public view returns (uint256) {
+    VestingSchedule memory schedule = vestingSchedules[token];
+    if (!isEligible[token][user] || !schedule.isActive || block.timestamp < schedule.startTime) {
+        return 0;
+    }
+    if (block.timestamp < schedule.startTime + schedule.cliffDuration) {
+        return 0;
+    }
+    uint256 timeElapsed = block.timestamp - (schedule.startTime + schedule.cliffDuration);
+    if (timeElapsed >= schedule.vestingDuration) {
+        return schedule.totalAmount;
+    }
+    return (schedule.totalAmount * timeElapsed) / schedule.vestingDuration;
+}
+```
+
+**What It Does**:
+- Checks if the user is eligible and the schedule is active.
+- Returns 0 if the vesting hasn’t started or is in the cliff period.
+- Calculates the vested amount based on time elapsed since the cliff ended.
+
+**Common Errors**:
+- **Invalid Token/User**: Ensure `token` and `user` are valid addresses.
+- **Inactive Schedule**: Verify the schedule is active and has a non-zero `totalAmount`.
+
+**Pro Tip**: Test this function with different timestamps to ensure vesting calculations are correct.
+
+### 2.2 TokenClaimContract.sol (Sepolia)
+
+This contract handles token claims, with KRNL verifying eligibility.
+
+**Key Function: `claimTokens`**
+
+```solidity
+function claimTokens(
+    KrnlPayload memory krnlPayload,
+    address token,
+    uint256 amount
+) external nonReentrant onlyAuthorized(krnlPayload, abi.encode(token, amount)) {
+    require(token != address(0), "Invalid token address");
+    require(amount > 0, "Amount must be greater than 0");
+    
+    KernelResponse[] memory responses = abi.decode(
+        krnlPayload.kernelResponses, (KernelResponse[])
+    );
+    
+    uint256 vestedAmount = 0;
+    for (uint i = 0; i < responses.length; i++) {
+        if (responses[i].kernelId == vestingKernelId) {
+            if (bytes(responses[i].err).length > 0) {
+                revert("Kernel error: Vesting verification failed");
             }
+            vestedAmount = abi.decode(responses[i].result, (uint256));
+            break;
         }
     }
+    
+    require(vestedAmount > 0, "No tokens vested yet");
+    uint256 claimable = vestedAmount - userClaims[msg.sender][token];
+    require(claimable >= amount, "Claiming more than vested");
+    
+    userClaims[msg.sender][token] += amount;
+    totalClaims[token] += amount;
+    IERC20(token).safeTransfer(msg.sender, amount);
 }
 ```
 
-### KRNL Architecture Benefits
-- **Security**: All claims verified through KRNL kernels before execution
-- **Cross-Chain**: Seamless data verification across multiple networks
-- **Decentralization**: No central authority needed for vesting verification
-- **Transparency**: All verification logic is on-chain and auditable
+**What It Does**:
+- Takes a `KrnlPayload` (must be first parameter) for KRNL verification.
+- Uses the `onlyAuthorized` modifier to ensure KRNL approves the transaction.
+- Decodes kernel responses to get the vested amount from `getVestedAmount`.
+- Checks if the requested `amount` is claimable and transfers tokens.
 
-## 🏗️ Architecture Overview
+**Common Errors**:
+- **Parameter Order**: `krnlPayload` must be the first parameter.
+- **Encoding Mismatch**: `abi.encode(token, amount)` must match `claimTokens`’s signature (`address`, `uint256`).
+- **Kernel Errors**: Always check `responses[i].err` to avoid processing invalid results.
+- **Insufficient Balance**: Ensure the contract has enough tokens to transfer.
 
-### Network Distribution (Cross-Chain)
-| Network | Chain ID | Purpose | Contracts |
-|---------|----------|---------|-----------|
-| **Base Sepolia** | 84532 | Vesting Management | TokenVestingKernel (KRNL Kernel) |
-| **Sepolia** | 11155111 | Token Operations | TokenClaimContract, VestedToken |
+**Pro Tip**: Simulate the transaction using a tool like Hardhat to verify KRNL responses before executing.
 
-### KRNL Flow
-```
-1. Admin creates vesting schedule → Base Sepolia (TokenVestingKernel)
-2. User initiates claim → Sepolia (TokenClaimContract)  
-3. KRNL verifies eligibility → Cross-chain kernel verification
-4. Tokens transferred → Sepolia (if verification passes)
-```
+## Part 3: Frontend Development
 
-### Smart Contract Architecture
+Let’s build the React frontend to interact with our contracts, focusing on KRNL integration.
 
-#### TokenVestingKernel.sol (Base Sepolia) - The KRNL Kernel
-```solidity
-contract TokenVestingKernel {
-    struct VestingSchedule {
-        uint256 totalAmount;      // Total tokens to vest per user
-        uint256 startTime;        // Vesting start timestamp  
-        uint256 cliffDuration;    // Cliff period in seconds
-        uint256 vestingDuration;  // Total vesting duration
-        bool isActive;            // Schedule status
-        address creator;          // Schedule creator
-        address[] eligibleAddresses; // Eligible users list
-    }
-    
-    // One vesting schedule per token (simplified architecture)
-    mapping(address => VestingSchedule) public vestingSchedules;
-    mapping(address => mapping(address => bool)) public isEligible;
-    
-    // Main kernel function - called by KRNL for verification
-    function getVestedAmount(address token, address user) 
-        public view returns (uint256) {
-        // Returns vested amount for KRNL verification
-        // Checks eligibility and calculates based on time
-    }
-}
+### 3.1 Setting Up the Frontend
+
+```bash
+mkdir src/frontend
+cd src/frontend
+npm create vite@latest . -- --template react-ts
+npm install wagmi viem @tanstack/react-query krnl-sdk
+npm install @radix-ui/react-* lucide-react tailwindcss sonner framer-motion class-variance-authority
 ```
 
-#### TokenClaimContract.sol (Sepolia) - KRNL Integration
-```solidity
-contract TokenClaimContract is KRNL, ReentrancyGuard {
-    // KRNL integration with proper parameter encoding
-    function claimTokens(
-        KrnlPayload memory krnlPayload,  // MUST be first parameter
-        address token,
-        uint256 amount
-    ) external onlyAuthorized(krnlPayload, abi.encode(token, amount)) {
-        // KRNL handles all verification automatically
-        // Contract can trust the kernel responses
-    }
-    
-    // Multi-token support with comprehensive tracking
-    mapping(address => mapping(address => uint256)) public userDeposits;
-    mapping(address => mapping(address => uint256)) public userClaims;
-}
-```
+### 3.2 Key Function: `executeKernel`
 
-### Frontend KRNL Integration
+The `executeKernel` function is the core of KRNL integration in the frontend. It prepares data for KRNL and retrieves verified results.
+
 ```typescript
-// KRNL SDK integration for frontend
-import { ethers } from 'krnl-sdk'
-
-// Execute kernel verification before contract call
-const { krnlPayload } = await executeKernel(token, user, amount)
-
-// Call contract with KRNL payload
-await claimContract.claimTokens(krnlPayload, token, amount)
+const executeKernel = async (token: string, user: string, amount: string) => {
+    const parsedAmount = parseEther(amount);
+    if (!address) throw "Address not found";
+    
+    const kernelParams = abiCoder.encode(["address", "address"], [token, user]);
+    const functionParams = abiCoder.encode(["address", "uint256"], [token, parsedAmount]);
+    
+    const kernelRequestData = {
+        senderAddress: address,
+        kernelPayload: {
+            [VESTING_KERNEL_ID]: { functionParams: kernelParams }
+        }
+    };
+    
+    const krnlPayload = await provider.executeKernels(
+        KRNL_ENTRY_ID,
+        KRNL_ACCESS_TOKEN,
+        kernelRequestData,
+        functionParams
+    );
+    
+    return { krnlPayload };
+}
 ```
 
-## 🚀 Quick Start
+**Step-by-Step Breakdown**:
+1. **Parse Amount**: Converts the `amount` to a uint256 using `parseEther`.
+2. **Encode Kernel Parameters**: Encodes `token` and `user` for `getVestedAmount` (`["address", "address"]`).
+3. **Encode Function Parameters**: Encodes `token` and `parsedAmount` for `claimTokens` (`["address", "uint256"]`).
+4. **Build Kernel Request**: Specifies the kernel ID and parameters.
+5. **Execute Kernel**: Calls `executeKernels` with KRNL credentials and returns the payload.
 
-### Prerequisites
-- **Node.js 18+** and npm
-- **MetaMask** configured for Sepolia and Base Sepolia
-- **Test ETH** on both networks
-- **KRNL Platform Account** - [Sign up here](https://app.platform.krnl.xyz)
+**Common Errors**:
+- **Encoding Issues**: Ensure `kernelParams` and `functionParams` match the function signatures exactly.
+- **KRNL Credentials**: Verify `KRNL_ENTRY_ID` and `KRNL_ACCESS_TOKEN` in `.env`.
+- **Network Mismatch**: Ensure the wallet is on Sepolia for claims.
 
-### Installation
+**Known Issue**: TypeScript may warn about `functionParams` types in `kernelRequestData`. This is a known KRNL SDK bug; ignore it if your parameters are correctly encoded.
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd token-vesting-kernel
-   ```
+**Pro Tip**: Log `kernelParams` and `functionParams` to verify encoding. Use the KRNL platform logs to debug execution failures.
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   cd src/frontend && npm install && cd ../..
-   ```
+### 3.3 Environment Configuration
 
-3. **Set up environment variables**
-   ```bash
-   cp .env.example .env
-   # Edit .env with your KRNL credentials and RPC URLs
-   ```
-
-### KRNL Configuration
-
-Create your KRNL configuration in `.env`:
+Create `src/frontend/.env`:
 
 ```bash
-# KRNL Platform Configuration (Required)
-TOKEN_AUTHORITY_PUBLIC_KEY=0x...  # From KRNL platform
-VESTING_KERNEL_ID=123             # Your registered kernel ID
-
-# Network Configuration
-SEPOLIA_RPC_URL=https://sepolia.infura.io/v3/YOUR_PROJECT_ID
-BASE_SEPOLIA_RPC_URL=https://sepolia.base.org
-
-# API Keys for Contract Verification  
-ETHERSCAN_API_KEY=your_etherscan_api_key
-BASESCAN_API_KEY=your_basescan_api_key
-```
-
-Frontend KRNL configuration in `src/frontend/.env`:
-
-```bash
-# KRNL Integration (Required for frontend)
 VITE_KRNL_ENTRY_ID=your_entry_id
-VITE_KRNL_ACCESS_TOKEN=your_access_token  
-VITE_VESTING_KERNEL_ID=123
+VITE_KRNL_ACCESS_TOKEN=your_access_token
+VITE_VESTING_KERNEL_ID=1
 VITE_TOKEN_AUTHORITY_PUBLIC_KEY=0x...
-
-# Contract Addresses (After deployment)
+VITE_SEPOLIA_RPC_URL=https://sepolia.infura.io/v3/YOUR_PROJECT_ID
 VITE_VESTED_TOKEN_ADDRESS=0x...
 VITE_TOKEN_CLAIM_CONTRACT_ADDRESS=0x...
 VITE_TOKEN_VESTING_KERNEL_ADDRESS=0x...
 ```
 
-### Deployment (Cross-Chain)
+## Part 4: KRNL Platform Integration
 
-1. **Compile contracts**
-   ```bash
-   npm run compile
-   ```
+To use KRNL:
+1. Deploy `TokenVestingKernel` to Base Sepolia (`npm run deploy:vesting-kernel`).
+2. Register the kernel on [KRNL Platform](https://app.platform.krnl.xyz).
+3. Configure the token authority.
+4. Obtain `KRNL_ENTRY_ID` and `KRNL_ACCESS_TOKEN` for your `.env`.
 
-2. **Deploy TokenVestingKernel to Base Sepolia**
-   ```bash
-   npm run deploy:vesting-kernel
-   # Note the deployed address for frontend config
-   ```
+**Testing Flow**:
 
-3. **Deploy token contracts to Sepolia**
-   ```bash
-   npm run deploy:vested-token
-   npm run deploy:claim-contract
-   ```
+| Step               | Action                                      | Expected Outcome                     |
+|--------------------|---------------------------------------------|--------------------------------------|
+| Deploy Contracts   | Run deployment scripts                      | Contracts deployed with addresses    |
+| Register Kernel    | Use KRNL platform interface                 | Obtain entry ID and access token     |
+| Test Frontend      | Start frontend, create schedule, claim tokens | Successful cross-chain verification  |
 
-4. **Verify contracts**
-   ```bash
-   npm run verify:all
-   ```
+## Part 5: Key Learning Points
 
-5. **Generate ABIs for frontend**
-   ```bash
-   npm run generate:abis
-   ```
+- **KRNL Best Practices**:
+  - Place `KrnlPayload` first in protected functions.
+  - Match parameter encoding to function signatures.
+  - Always check kernel errors before processing results.
+- **Cross-Chain Design**: Use Base Sepolia for verification and Sepolia for execution.
+- **Common Errors**:
+  - Incorrect parameter encoding causes "UnauthorizedTransaction" reverts.
+  - Ensure correct network connectivity.
+- **TypeScript Warning**: Ignore `functionParams` type warnings in `kernelRequestData` (KRNL SDK issue).
 
-6. **Start the frontend**
-   ```bash
-   npm run frontend
-   ```
+## Conclusion
 
-## 📖 KRNL Integration Guide
+You’ve built a secure, KRNL-powered token vesting platform! This project showcases decentralized verification and cross-chain functionality. Try extending it with governance or staking features, or explore more KRNL kernels.
 
-### For Developers Learning KRNL
+**Resources**:
+- [KRNL Documentation](https://docs.krnl.xyz)
+- [KRNL Platform](https://app.platform.krnl.xyz)
+- [Source Code](https://github.com/Jovells/token-vest.git)
+- [Live Demo](https://token-vest-tau.vercel.app)
 
-This platform demonstrates key KRNL concepts:
-
-#### 1. Kernel Registration Pattern
-Follow the KRNL development pattern:
-- Deploy your kernel contract (TokenVestingKernel)
-- Register it with KRNL platform
-- Configure Token Authority
-
-#### 2. Smart Contract Integration
-```solidity
-// Always inherit from KRNL base contract
-contract TokenClaimContract is KRNL {
-    constructor(address _tokenAuthorityPublicKey) KRNL(_tokenAuthorityPublicKey) {
-        // Initialize with your Token Authority
-    }
-    
-    // Protected functions use onlyAuthorized modifier
-    function claimTokens(
-        KrnlPayload memory krnlPayload,  // ALWAYS first parameter
-        address token,
-        uint256 amount
-    ) external onlyAuthorized(krnlPayload, abi.encode(token, amount)) {
-        // Your protected logic here
-    }
-}
-```
-
-#### 3. Frontend KRNL SDK Usage
-```typescript
-// Execute kernel before contract interaction
-const kernelRequestData = {
-    senderAddress: userAddress,
-    kernelPayload: {
-        [VESTING_KERNEL_ID]: {
-            functionParams: encodedParams
-        }
-    }
-}
-
-const krnlPayload = await provider.executeKernels(
-    ENTRY_ID, 
-    ACCESS_TOKEN, 
-    kernelRequestData, 
-    functionParams
-)
-
-// Use payload in contract call
-await contract.claimTokens(krnlPayload, token, amount)
-```
-
-### Learning Resources
-
-- **KRNL Documentation**: [docs.krnl.xyz](https://docs.krnl.xyz)
-- **Platform Registration**: [app.platform.krnl.xyz](https://app.platform.krnl.xyz)
-
-## 🎯 Demo Platform Features
-
-### Token Claims
-- **Cross-Chain Verification**: Claims verified through KRNL kernels on Base Sepolia
-- **Real-Time Eligibility**: Instant kernel-based eligibility verification
-- **Secure Process**: Multi-step KRNL verification before token transfer
-- **User Experience**: Prominent interface highlighting KRNL integration
-- **Chain Switching**: Automatic network switching with user-friendly prompts
-
-### Token Management
-- **Deposit Operations**: Deposit tokens to make them available for claims (Sepolia)
-- **Withdraw Operations**: Remove deposited tokens from the claim pool (Sepolia)
-- **Balance Tracking**: Real-time tracking of deposits and claims
-
-### Admin Features (Base Sepolia)
-- **Schedule Creation**: Create vesting schedules on Base Sepolia using KRNL kernels
-- **Template System**: Quick templates for common vesting patterns
-- **Chain Switching**: Automatic prompts to switch to Base Sepolia for admin operations
-- **Multi-token Support**: Manage schedules for any ERC20 token
-- **Real-time Monitoring**: Live schedule tracking across chains
-
-### KRNL Integration Showcase
-- **Kernel-Verified Claims**: Primary feature showcasing KRNL's cross-chain capabilities
-- **Secure Architecture**: Proper KRNL integration patterns and best practices
-- **Error Handling**: Comprehensive kernel error handling examples
-- **Performance**: Efficient kernel execution and response processing
-- **Network Management**: Smart chain switching for optimal user experience
-
-## 🔧 Development
-
-### Available Scripts
-
-```bash
-# Contract Development
-npm run compile                    # Compile contracts
-npm run deploy:vesting-kernel     # Deploy kernel to Base Sepolia  
-npm run deploy:vested-token       # Deploy token to Sepolia
-npm run deploy:claim-contract     # Deploy claim contract to Sepolia
-npm run verify:all                # Verify all contracts
-
-# Frontend Development
-npm run generate:abis             # Generate TypeScript ABIs
-npm run frontend                  # Start development server (Vite)
-
-# Testing
-npm test                          # Run contract tests
-npm run test:frontend            # Run frontend tests
-```
-
-### Project Structure
-
-```
-├── src/contracts/              # Smart contracts
-│   ├── TokenVestingKernel.sol  # KRNL kernel (Base Sepolia)
-│   ├── TokenClaimContract.sol  # KRNL integration (Sepolia)
-│   ├── VestedToken.sol         # Demo ERC20 (Sepolia)
-│   └── KRNL.sol               # KRNL base contract
-├── src/frontend/               # React + KRNL SDK
-│   ├── src/hooks/             # KRNL integration hooks
-│   ├── src/components/        # UI components
-│   │   ├── user/             # User components
-│   │   │   ├── token-claim.tsx    # KRNL claim feature (main)
-│   │   │   ├── token-operations.tsx # Deposit/withdraw
-│   │   │   └── token-info.tsx     # Vesting information
-│   │   └── admin/            # Admin components
-│   └── src/config/           # KRNL and network config
-├── scripts/                   # Deployment scripts
-└── docs/                     # Documentation
-```
-
-## 🌟 Why This Demo Platform?
-
-### For KRNL Developers
-- **Real Implementation**: Production-ready KRNL integration patterns
-- **Cross-Chain Example**: Practical multi-network KRNL usage with automatic chain switching
-- **Best Practices**: Security patterns and error handling
-- **Complete Stack**: Full-stack KRNL application example
-
-### For dApp Builders  
-- **KRNL SDK Integration**: Frontend integration with KRNL kernels
-- **Multi-Chain UI**: User experience across multiple networks with seamless switching
-- **Error Handling**: Comprehensive error management patterns
-- **Modern Stack**: React + TypeScript + Tailwind + KRNL
-
-### For Smart Contract Developers
-- **KRNL Base Contract**: Proper inheritance and modifier usage
-- **Kernel Response Handling**: Decoding and processing kernel responses  
-- **Parameter Encoding**: Correct parameter encoding for KRNL authorization
-- **Cross-Chain Architecture**: Designing for KRNL's cross-chain capabilities
-
-## 🔗 Links & Resources
-
-- **KRNL Platform**: [krnl.xyz](https://krnl.xyz)
-- **KRNL Documentation**: [docs.krnl.xyz](https://docs.krnl.xyz)  
-- **KRNL Workshop**: [Speed's Workshop](https://docs.krnl.xyz/workshop/speeds-workshop)
-- **Created by**: [Jovells](https://linktr.ee/jovells)
-
-## 📚 Additional Documentation
-
-- [Deployment Guide](./DEPLOYMENT_GUIDE.md) - Cross-chain deployment instructions
-- [Developer Guide](./DEVELOPER_GUIDE.md) - KRNL integration development
-- [Kernel Guide](./KERNEL_GUIDE.md) - TokenVestingKernel implementation
-- [Claim Contract Guide](./CLAIM_CONTRACT_GUIDE.md) - KRNL integration patterns
-- [FAQ](./FAQ.md) - Common KRNL integration questions
-
----
-
-**Built with ❤️ by [Jovells](https://linktr.ee/jovells) • Powered by [KRNL](https://krnl.xyz)**
-
-> 🎓 **Educational Note**: This platform demonstrates KRNL integration patterns for developers. Use it to learn kernel implementation, cross-chain verification, and secure dApp architecture with KRNL technology.
+Happy building, and let KRNL unlock your Web3 potential!
