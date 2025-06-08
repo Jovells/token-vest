@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Calendar, Clock, Users, AlertTriangle, Loader2, CheckCircle } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -8,6 +8,7 @@ import { useVesting } from '@/hooks/useVesting'
 import { useContractOperations } from '@/hooks/useContractOperations'
 import { useSwitchChain } from 'wagmi'
 import { baseSepolia } from 'viem/chains'
+import { useTokenContext } from '@/contexts/token-context'
 
 const SCHEDULE_TEMPLATES = [
   {
@@ -43,14 +44,19 @@ const SCHEDULE_TEMPLATES = [
 ]
 
 export function ScheduleForm() {
+  const { selectedToken } = useTokenContext()
   const [adminForm, setAdminForm] = useState({
-    tokenAddress: '',
+    tokenAddress: selectedToken || '',
     totalAmount: '',
     startTime: '',
     cliffDuration: '',
     vestingDuration: '',
     eligibleAddresses: ''
   })
+
+  useEffect(() => {
+    setAdminForm(prev => ({ ...prev, tokenAddress: selectedToken || '' }))
+  }, [selectedToken])
 
   const { isBaseSepolia } = useVesting('')
   const { switchChain } = useSwitchChain()
@@ -89,7 +95,7 @@ export function ScheduleForm() {
     if (success) {
       setShowSuccess(true)
       setAdminForm({
-        tokenAddress: '',
+        tokenAddress: selectedToken || '',
         totalAmount: '',
         startTime: '',
         cliffDuration: '',
@@ -211,9 +217,9 @@ export function ScheduleForm() {
             <div className="space-y-2">
               <label className="text-sm font-medium">Token Address</label>
               <Input
-                placeholder="0x..."
+                placeholder="Select a token to see its address here"
                 value={adminForm.tokenAddress}
-                onChange={(e) => setAdminForm(prev => ({ ...prev, tokenAddress: e.target.value }))}
+                readOnly
                 disabled={!isBaseSepolia}
               />
             </div>

@@ -286,7 +286,7 @@ export function TokenSelector() {
           className="bg-[#001efe] hover:bg-[#001efe]/90 text-white rounded-xl px-4 py-2.5 h-12 shadow-sm transition-all duration-200 hover:shadow-md"
         >
           <Plus className="h-4 w-4 mr-2" />
-          Mint
+          Mint Test Tokens
         </Button>
       )}
 
